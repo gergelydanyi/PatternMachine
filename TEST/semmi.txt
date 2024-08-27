@@ -1,0 +1,24 @@
+#define stringize(x) #x
+#define charize(x) #@x
+#define tokenpasting(x) ##x
+#define follow(x) x##
+
+
+stringize:
+----------
+stringize(alma)
+
+charize:
+--------
+charize(a)
+charize(al)
+
+tokenpasting:
+-------------
+
+tokenpasting(alm)
+
+follow:
+-------
+
+follow(korte)
