@@ -3,6 +3,8 @@
 
 #include "framework.h"
 #include "PatternMachine.h"
+#include "ApplicationCore.h"
+
 
 #define MAX_LOADSTRING 100
 
@@ -10,10 +12,11 @@
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+ApplicationCore appCore; // TODO: do not use a global variable for this
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                InitInstance(HINSTANCE, int);
+BOOL                InitInstance(HINSTANCE, int, ApplicationCore);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
@@ -25,7 +28,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: Place code here.
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -33,7 +35,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MyRegisterClass(hInstance);
 
     // Perform application initialization:
-    if (!InitInstance (hInstance, nCmdShow))
+    if (!InitInstance (hInstance, nCmdShow, appCore))
     {
         return FALSE;
     }
@@ -93,12 +95,13 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //        In this function, we save the instance handle in a global variable and
 //        create and display the main program window.
 //
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, ApplicationCore appCore)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, &appCore);
+   appCore.mainWindow = hWnd;
 
    if (!hWnd)
    {
@@ -123,6 +126,18 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    ApplicationCore* pAppCore;
+    if (message == WM_CREATE)
+    {
+        CREATESTRUCTW* pcs = reinterpret_cast<CREATESTRUCTW*>(lParam);
+        pAppCore = reinterpret_cast<ApplicationCore*>(pcs->lpCreateParams);
+        SetWindowLongPtrW(hWnd, GWLP_USERDATA, (LONG_PTR)pAppCore);
+    }
+    else
+    {
+        LONG_PTR lp = GetWindowLongPtrW(hWnd, GWLP_USERDATA);
+        pAppCore = reinterpret_cast<ApplicationCore*>(lp);
+    }
     switch (message)
     {
     case WM_COMMAND:
@@ -143,12 +158,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Add any drawing code that uses hdc here...
-            EndPaint(hWnd, &ps);
-        }
+        pAppCore->On_WM_PAINT();
+        break;
+    case WM_LBUTTONDOWN:
+        pAppCore->On_WM_LBUTTONDOWN(lParam);
+        break;
+    case WM_LBUTTONUP:
+        pAppCore->On_WM_LBUTTONUP(lParam);
+        break;
+    case WM_SIZE:
+        pAppCore->On_WM_SIZE();
         break;
     case WM_DESTROY:
         PostQuitMessage(0);
