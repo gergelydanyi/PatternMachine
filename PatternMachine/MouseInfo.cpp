@@ -1,23 +1,60 @@
 #include "MouseInfo.h"
+#include <math.h>
 
 void MouseInfo::On_WM_LBUTTONDOWN(LPARAM lParam)
 {
 	SetCoordinates(LEFT_BUTTON_DOWN, lParam);
+	leftButtonPressed = true;
 }
 
 void MouseInfo::On_WM_LBUTTONUP(LPARAM lParam)
 {
 	SetCoordinates(LEFT_BUTTON_UP, lParam);
+	leftButtonPressed = false;
+}
+
+void MouseInfo::On_WM_RBUTTONDOWN(LPARAM lParam)
+{
+	SetCoordinates(RIGHT_BUTTON_DOWN, lParam);
+	rightButtonPressed = true;
+}
+
+void MouseInfo::On_WM_RBUTTONUP(LPARAM lParam)
+{
+	SetCoordinates(RIGHT_BUTTON_UP, lParam);
+	rightButtonPressed = false;
+}
+
+void MouseInfo::On_WM_MOUSEMOVE(LPARAM lParam)
+{
+	SetCoordinates(CURRENT_POSITION, lParam);
+	lastlParam = lParam;
 }
 
 LONG MouseInfo::X()
 {
-	return GetCoordinates(LEFT_BUTTON_DOWN).x;
+	return GetCoordinates(CURRENT_POSITION).x;
 }
 
 LONG MouseInfo::Y()
 {
-	return GetCoordinates(LEFT_BUTTON_DOWN).y;
+	return GetCoordinates(CURRENT_POSITION).y;
+}
+
+POINT MouseInfo::CurrentPosition()
+{
+	return GetCoordinates(CURRENT_POSITION);
+}
+
+POINT MouseInfo::PreviousPosition()
+{
+	return GetCoordinates(PREVIOUS_POSITION);
+}
+
+POINT MouseInfo::MotionVector()
+{
+	return { GetCoordinates(CURRENT_POSITION).x - GetCoordinates(PREVIOUS_POSITION).x,
+			 GetCoordinates(CURRENT_POSITION).y - GetCoordinates(PREVIOUS_POSITION).y };
 }
 
 POINT MouseInfo::LD()
@@ -48,6 +85,16 @@ POINT MouseInfo::MD()
 POINT MouseInfo::MU()
 {
 	return GetCoordinates(MIDDLE_BUTTON_UP);
+}
+
+bool MouseInfo::LeftButtonPressed()
+{
+	return leftButtonPressed;
+}
+
+bool MouseInfo::RightButtonPressed()
+{
+	return rightButtonPressed;
 }
 
 void MouseInfo::SetCoordinates(MouseCoordinates mouseCoordinates, LPARAM lParam)
