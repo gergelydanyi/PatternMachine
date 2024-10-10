@@ -3,17 +3,20 @@
 #include "MouseInfo.h"
 #include "Rectangle.h"
 #include "Freehand.h"
+#include "Route.h"
 
 enum ShapeType
 {
 	RectangleShapeType,
 	LineShapeType,
-	FreehandShapeType
+	FreehandShapeType,
+	RouteShapeType
 };
 
 class ApplicationCore
 {
 public:
+	ApplicationCore();
 	MouseInfo mouse;
 	HWND mainWindow;
 	void On_WM_LBUTTONDOWN(LPARAM);
@@ -30,6 +33,8 @@ public:
 	void CopyToClipboard();
 	void SelectShapeType(ShapeType);
 	HDC RGBDC;
+	COLORREF borderColor;
+	int penWidth;
 private:
 	HDC clientDC;
 	HDC memoryDC;
@@ -42,9 +47,11 @@ private:
 	RECT rcRGB;
 	PatternMachine::Rectangle rectangleShape;
 	PatternMachine::Freehand freehandShape;
+	PatternMachine::Route routeShape;
 	ShapeType selectedShapeType;
 	int DrawFrameRect();
 	void DrawFreehand();
+	void DrawRoute();
 	void DrawRGB();
 
 	void StartDrawingShape();

@@ -3,6 +3,12 @@
 #include <time.h>
 #include <limits>
 
+ApplicationCore::ApplicationCore()
+{
+    borderColor = RGB(255, 0, 0);
+    penWidth = 20;
+}
+
 void ApplicationCore::On_WM_LBUTTONDOWN(LPARAM lParam)
 {
     mouse.On_WM_LBUTTONDOWN(lParam);
@@ -72,7 +78,8 @@ void ApplicationCore::On_WM_PAINT()
     //      - rules can be applied after combining them, as real functions
     //      - function can be applied for everything, ex. angle of lines in shapes, a color of a pixel in a bitmap and so on
     //      - perhaps later the whole ruleset can get a mathematical formulation
-
+    //      
+    //      - multithreading
     PAINTSTRUCT ps;
     clientDC = BeginPaint(mainWindow, &ps);
     // This is only for DEBUG
@@ -94,6 +101,7 @@ void ApplicationCore::On_WM_PAINT()
     // success variable is used only for DEBUG
     int success = DrawFrameRect();
     DrawFreehand();
+    DrawRoute();
 
     // DEBUG
     int debug = false;
@@ -152,7 +160,9 @@ void ApplicationCore::On_WM_PAINT()
     }
     // DEBUG
 
-    if (!rectangleShape.isEditing())
+    if (!(
+        rectangleShape.isEditing() || routeShape.isEditing()
+        ))
     {
         BitBlt(memoryDC, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, clientDC, 0, 0, SRCCOPY);
     }
@@ -174,92 +184,98 @@ void ApplicationCore::On_WM_SIZE()
         // This is only for DEBUG
         
         RECT rc = { 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top };
-        HBRUSH hbr = CreateSolidBrush(RGB(0, 0, 0));
+        HBRUSH hbr = CreateSolidBrush(RGB(255, 255, 255));
         FillRect(memoryDC, &rc, hbr);
         DeleteObject(hbr);
-        SetRect(&rc, 240, 240, 485, 485);
-        hbr = CreateSolidBrush(RGB(100, 200, 180));
-        FillRect(memoryDC, &rc, hbr);
+//        SetRect(&rc, 240, 240, 485, 485);
+//        hbr = CreateSolidBrush(RGB(100, 200, 180));
+//        FillRect(memoryDC, &rc, hbr);
         DeleteObject(hbr);
-        //grid
-        int gridWidth = 20;
-        int lineWidth = 2;
-        for (int i = 0; i < rcClient.right - rcClient.left; ++i)
+        if (false)
         {
-            for (int j = 0; j < rcClient.bottom - rcClient.top; ++j)
+            //grid
+            int gridWidth = 20;
+            int lineWidth = 2;
+            for (int i = 0; i < rcClient.right - rcClient.left; ++i)
             {
-                long r = 150;
-                long g = 150;
-                long b = 150;
-                if ((i % gridWidth < gridWidth - lineWidth) && (j % gridWidth < gridWidth - lineWidth))
+                for (int j = 0; j < rcClient.bottom - rcClient.top; ++j)
                 {
-                    r = g = b = 150;
+                    long r = 150;
+                    long g = 150;
+                    long b = 150;
+                    if ((i % gridWidth < gridWidth - lineWidth) && (j % gridWidth < gridWidth - lineWidth))
+                    {
+                        r = g = b = 150;
+                    }
+                    else
+                    {
+                        r = g = b = 130;
+                    }
+                    SetPixelV(memoryDC, i, j, RGB(r, g, b));
                 }
-                else
-                {
-                    r = g = b = 130;
-                }
-                SetPixelV(memoryDC, i, j, RGB(r, g, b));
             }
+            SetPixelV(memoryDC, 1, 1, RGB(255, 0, 0));
+            //grid
         }
-        SetPixelV(memoryDC, 1, 1, RGB(255, 0, 0));
-        //grid
-        // rectangles for example
-        int repeat = 5;
-        int side = 20;
-        for (int i = 0; i < repeat; ++i)
+        if (false)
         {
-            for (int j = 0; j < repeat; ++j)
+            // rectangles for example
+            int repeat = 5;
+            int side = 20;
+            for (int i = 0; i < repeat; ++i)
             {
-                rc = { 3 + side * i,
-                       3 + side * j,
-                       3 + (side + 1) * i,
-                       3 + (side + 1) * j };
-                HBRUSH hbrFrame = CreateSolidBrush(RGB(0, 0, 0));
-                FrameRect(memoryDC, &rc, hbrFrame);
-                DeleteObject(hbrFrame);
+                for (int j = 0; j < repeat; ++j)
+                {
+                    rc = { 3 + side * i,
+                           3 + side * j,
+                           3 + (side + 1) * i,
+                           3 + (side + 1) * j };
+                    HBRUSH hbrFrame = CreateSolidBrush(RGB(0, 0, 0));
+                    FrameRect(memoryDC, &rc, hbrFrame);
+                    DeleteObject(hbrFrame);
 
-                rc = { 13 + side * i,
-                       3 + side * j,
-                       13 + (side + 1) * i,
-                       3 + (side + 1) * j };
-                HBRUSH hbrFill = CreateSolidBrush(RGB(0, 200, 0));
-                FillRect(memoryDC, &rc, hbrFill);
-                DeleteObject(hbrFill);
+                    rc = { 13 + side * i,
+                           3 + side * j,
+                           13 + (side + 1) * i,
+                           3 + (side + 1) * j };
+                    HBRUSH hbrFill = CreateSolidBrush(RGB(0, 200, 0));
+                    FillRect(memoryDC, &rc, hbrFill);
+                    DeleteObject(hbrFill);
 
-                rc = { 3 + side * i,
-                       13 + side * j,
-                       3 + (side + 1) * i,
-                       13 + (side + 1) * j };
-                HBRUSH hbrRect = CreateSolidBrush(RGB(200, 0, 0));
-                SelectObject(memoryDC, hbrRect);
-                HPEN hPen = CreatePen(PS_SOLID, 0, RGB(0, 0, 200));
-                SelectObject(memoryDC, hPen);
-                Rectangle(memoryDC, rc.left, rc.top, rc.right, rc.bottom);
-                DeleteObject(hbrRect);
-                DeleteObject(hPen);
+                    rc = { 3 + side * i,
+                           13 + side * j,
+                           3 + (side + 1) * i,
+                           13 + (side + 1) * j };
+                    HBRUSH hbrRect = CreateSolidBrush(RGB(200, 0, 0));
+                    SelectObject(memoryDC, hbrRect);
+                    HPEN hPen = CreatePen(PS_SOLID, 0, RGB(0, 0, 200));
+                    SelectObject(memoryDC, hPen);
+                    Rectangle(memoryDC, rc.left, rc.top, rc.right, rc.bottom);
+                    DeleteObject(hbrRect);
+                    DeleteObject(hPen);
 
-                POINT vertices[4];
-                vertices[0].x = 13 + side * i;
-                vertices[0].y = 13 + side * j;
-                vertices[1].x = 13 + (side + 1) * i;
-                vertices[1].y = vertices[0].y;
-                vertices[2].x = vertices[1].x;
-                vertices[2].y = 13 + (side + 1) * j;
-                vertices[3].x = vertices[0].x;
-                vertices[3].y = vertices[2].y;
-                LOGBRUSH logBrush = { BS_NULL, 0, 0 };
-                HBRUSH hbrPoly = CreateSolidBrush(RGB(200, 100, 200));
-                hbrPoly = CreateBrushIndirect(&logBrush);
-                SelectObject(memoryDC, hbrPoly);
-                HPEN hpPoly = CreatePen(PS_SOLID, 0, RGB(200, 200, 0));
-                SelectObject(memoryDC, hpPoly);
-                Polygon(memoryDC, vertices, 4);
-                DeleteObject(hbrPoly);
-                DeleteObject(hpPoly);
+                    POINT vertices[4];
+                    vertices[0].x = 13 + side * i;
+                    vertices[0].y = 13 + side * j;
+                    vertices[1].x = 13 + (side + 1) * i;
+                    vertices[1].y = vertices[0].y;
+                    vertices[2].x = vertices[1].x;
+                    vertices[2].y = 13 + (side + 1) * j;
+                    vertices[3].x = vertices[0].x;
+                    vertices[3].y = vertices[2].y;
+                    LOGBRUSH logBrush = { BS_NULL, 0, 0 };
+                    HBRUSH hbrPoly = CreateSolidBrush(RGB(200, 100, 200));
+                    hbrPoly = CreateBrushIndirect(&logBrush);
+                    SelectObject(memoryDC, hbrPoly);
+                    HPEN hpPoly = CreatePen(PS_SOLID, 0, RGB(200, 200, 0));
+                    SelectObject(memoryDC, hpPoly);
+                    Polygon(memoryDC, vertices, 4);
+                    DeleteObject(hbrPoly);
+                    DeleteObject(hpPoly);
+                }
             }
+            // rectangles for example
         }
-        // rectangles for example
         // This is only for DEBUG
         DeleteDC(clntDC);
     }
@@ -285,7 +301,10 @@ void ApplicationCore::On_WM_SIZE()
         memoryDC = CreateCompatibleDC(copyDC);
         memoryBitMap = CreateCompatibleBitmap(copyDC, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top);
         SelectObject(memoryDC, memoryBitMap);
-        BitBlt(memoryDC, 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top, copyDC, 0, 0, SRCCOPY);
+        RECT rc = { 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top };
+        HBRUSH hbr = CreateSolidBrush(RGB(255, 255, 255));
+        FillRect(memoryDC, &rc, hbr);
+        DeleteObject(hbr); BitBlt(memoryDC, 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top, copyDC, 0, 0, SRCCOPY);
         DeleteObject(copyBitMap);
         DeleteDC(copyDC);
     }
@@ -328,7 +347,7 @@ int ApplicationCore::DrawFrameRect()
     int success = -10;
     if (!rectangleShape.isDrawn)
     {
-        HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 0));
+        HBRUSH hBrush = CreateSolidBrush(borderColor);
         success = FrameRect(clientDC, &rectangleShape.rect, hBrush);
 
         if (!rectangleShape.isEditing())
@@ -344,7 +363,7 @@ void ApplicationCore::DrawFreehand()
 {
     if (freehandShape.isSizing)
     {
-        HPEN hPen = CreatePen(PS_SOLID, 1, RGB(200, 200, 0));
+        HPEN hPen = CreatePen(PS_SOLID, penWidth, borderColor);
         SelectObject(clientDC, hPen);
         if (freehandShape.previousPoint.x == freehandShape.currentPoint.x &&
             freehandShape.previousPoint.y == freehandShape.currentPoint.y)
@@ -364,6 +383,38 @@ void ApplicationCore::DrawFreehand()
 int Distance(POINT p1, POINT p2)
 {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
+}
+
+void ApplicationCore::DrawRoute()
+{
+    if (!routeShape.isDrawn)
+    {
+        //HPEN hPen = CreatePen(PS_SOLID, penWidth, borderColor);
+        HPEN hPen = CreatePen(PS_SOLID, penWidth, RGB(rand() * 255 / RAND_MAX + 1, rand() * 255 / RAND_MAX + 1, rand() * 255 / RAND_MAX + 1));
+        SelectObject(clientDC, hPen);
+        if (routeShape.isEditing())
+        {
+            //HBRUSH hBrush = CreateSolidBrush(borderColor);
+            //FrameRect(clientDC, &routeShape.rect, hBrush);
+            MoveToEx(clientDC, routeShape.anchor.x, routeShape.anchor.y, NULL);
+            LineTo(clientDC, routeShape.endPoint.x, routeShape.endPoint.y);
+            //DeleteObject(hBrush);
+        }
+        else
+        {
+            POINT startPoint = routeShape.routePoints[0];
+            POINT nextPoint;
+            MoveToEx(clientDC, startPoint.x, startPoint.y, NULL);
+            for (int i = 1; i < routeShape.routePoints.size(); ++i)
+            {
+                nextPoint = routeShape.routePoints[i];
+                LineTo(clientDC, nextPoint.x, nextPoint.y);
+            }
+            routeShape.isDrawn = true;
+        }
+        DeleteObject(hPen);
+    }
+
 }
 
 void ApplicationCore::DrawRGB()
@@ -485,6 +536,10 @@ void ApplicationCore::StartDrawingShape()
             freehandShape.mainWindow = mainWindow;
             freehandShape.StartSizing(mouse.LD());
             break;
+        case RouteShapeType:
+            routeShape.mainWindow = mainWindow;
+            routeShape.StartSizing(mouse.LD());
+            break;
         default:
             break;
     }
@@ -503,6 +558,9 @@ void ApplicationCore::DrawingShape()
     case FreehandShapeType:
         freehandShape.Sizing(mouse.PreviousPosition(), mouse.CurrentPosition());
         break;
+    case RouteShapeType:
+        routeShape.Sizing(routeShape.anchor, mouse.CurrentPosition());
+        break;
     default:
         break;
     }
@@ -519,6 +577,9 @@ void ApplicationCore::StopDrawingShape()
         break;
     case FreehandShapeType:
         freehandShape.StopSizing();
+        break;
+    case RouteShapeType:
+        routeShape.StopSizing();
         break;
     default:
         break;

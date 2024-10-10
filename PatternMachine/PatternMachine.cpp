@@ -4,6 +4,7 @@
 #include "framework.h"
 #include "PatternMachine.h"
 #include "ApplicationCore.h"
+#include <time.h>
 #include <string>>
 
 
@@ -822,6 +823,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
+    
+    srand(time(0)); 
     hLogFile = OpenLog();
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
@@ -973,6 +976,99 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_SHAPE_FREEHAND:
                 pAppCore->SelectShapeType(ShapeType::FreehandShapeType);
                 break;
+            case ID_SHAPE_ROUTE:
+                pAppCore->SelectShapeType(ShapeType::RouteShapeType);
+                break;
+            case ID_PEN_1:
+                pAppCore->penWidth = 1;
+                break;
+            case ID_PEN_2:
+                pAppCore->penWidth = 2;
+                break;
+            case ID_PEN_3:
+                pAppCore->penWidth = 3;
+                break;
+            case ID_PEN_4:
+                pAppCore->penWidth = 4;
+                break;
+            case ID_PEN_5:
+                pAppCore->penWidth = 5;
+                break;
+            case ID_PEN_6:
+                pAppCore->penWidth = 6;
+                break;
+            case ID_PEN_7:
+                pAppCore->penWidth = 7;
+                break;
+            case ID_PEN_8:
+                pAppCore->penWidth = 8;
+                break;
+            case ID_PEN_9:
+                pAppCore->penWidth = 9;
+                break;
+            case ID_PEN_10:
+                pAppCore->penWidth = 10;
+                break;
+            case ID_PEN_11:
+                pAppCore->penWidth = 11;
+                break;
+            case ID_PEN_12:
+                pAppCore->penWidth = 12;
+                break;
+            case ID_PEN_13:
+                pAppCore->penWidth = 13;
+                break;
+            case ID_PEN_14:
+                pAppCore->penWidth = 14;
+                break;
+            case ID_PEN_15:
+                pAppCore->penWidth = 15;
+                break;
+            case ID_PEN_16:
+                pAppCore->penWidth = 16;
+                break;
+            case ID_PEN_17:
+                pAppCore->penWidth = 17;
+                break;
+            case ID_PEN_18:
+                pAppCore->penWidth = 18;
+                break;
+            case ID_PEN_19:
+                pAppCore->penWidth = 19;
+                break;
+            case ID_PEN_20:
+                pAppCore->penWidth = 20;
+                break;
+            case ID_PEN_21:
+                pAppCore->penWidth = 21;
+                break;
+            case ID_PEN_22:
+                pAppCore->penWidth = 22;
+                break;
+            case ID_PEN_23:
+                pAppCore->penWidth = 23;
+                break;
+            case ID_PEN_24:
+                pAppCore->penWidth = 24;
+                break;
+            case ID_PEN_25:
+                pAppCore->penWidth = 25;
+                break;
+            case ID_PEN_26:
+                pAppCore->penWidth = 26;
+                break;
+            case ID_PEN_27:
+                pAppCore->penWidth = 27;
+                break;
+            case ID_PEN_28:
+                pAppCore->penWidth = 28;
+                break;
+            case ID_PEN_29:
+                pAppCore->penWidth = 29;
+                break;
+            case ID_PEN_30:
+                pAppCore->penWidth = 30;
+                break;
             case ID_COLOR_BORDER:
             {
                 HGLOBAL hgbl;
@@ -1021,7 +1117,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 lpw += nchar;
                 *lpw++ = 0;             // No creation data
                 GlobalUnlock(hgbl);
-                DialogBoxIndirectParam(hInst, (LPDLGTEMPLATE)hgbl, hWnd, (DLGPROC)ColorPickerDialogProcess, (LPARAM)pAppCore);
+                INT_PTR color = DialogBoxIndirectParam(hInst, (LPDLGTEMPLATE)hgbl, hWnd, (DLGPROC)ColorPickerDialogProcess, (LPARAM)pAppCore);
+                //pAppCore->borderColor = LOWORD(color);
                 GlobalFree(hgbl);
             }
                 break;
@@ -1117,7 +1214,14 @@ BOOL CALLBACK ColorPickerDialogProcess(HWND hwndDlg, UINT message, WPARAM wParam
         return TRUE;
         break;
     case WM_LBUTTONUP:
+        {
+        int x = LOWORD(lParam);
+        int y = HIWORD(lParam);
+        HDC clientDC = GetDC(hwndDlg);
+        COLORREF color = GetPixel(clientDC, x, y);
+        pAppCore->borderColor = color;
         return TRUE;
+        }
         break;
     case WM_COMMAND:
         switch (LOWORD(wParam))
@@ -1125,6 +1229,12 @@ BOOL CALLBACK ColorPickerDialogProcess(HWND hwndDlg, UINT message, WPARAM wParam
         case IDCANCEL:
             EndDialog(hwndDlg, wParam);
             return TRUE;
+        case IDOK:
+            {
+                COLORREF color = RGB(0, 255, 255);
+                EndDialog(hwndDlg, INT_PTR(color));
+                return TRUE;
+            }
         }
     default:
         return FALSE;
