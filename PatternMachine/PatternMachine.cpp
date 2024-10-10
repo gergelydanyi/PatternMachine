@@ -926,6 +926,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, ApplicationCore appCore)
 //
 //
 
+// TODO: put the below code into a separate unit (ex. utility)
+
 LPWORD lpwAlign(LPWORD &lpIn)
 {
     ULONG ul;
@@ -943,6 +945,8 @@ LPWORD lpwAlign(LPWORD &lpIn)
 
     return (LPWORD)ull;
 }
+
+// TODO: put the below code into a separate unit
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {

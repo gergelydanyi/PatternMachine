@@ -81,6 +81,9 @@ void Route::CalculateRoute2()
 	temp_vector.push_back(endPoint);
 	routePoints = temp_vector;
 }
+
+// TODO: put this method in an outer class, because it is used in several classes
+
 double Route::Distance(POINT p1, POINT p2)
 {
 	return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));

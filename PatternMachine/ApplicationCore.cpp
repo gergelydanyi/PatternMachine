@@ -341,6 +341,8 @@ void ApplicationCore::CopyToClipboard()
     CloseClipboard();
 }
 
+// TODO: put the drawing methods in a new class, which is responsibel for drawing
+
 int ApplicationCore::DrawFrameRect()
 {
     // The following section draws a simple red square frame
@@ -379,6 +381,8 @@ void ApplicationCore::DrawFreehand()
         DeleteObject(hPen);
     }
 }
+
+// TODO: put this method in an outer class, because it is used in several classes
 
 int Distance(POINT p1, POINT p2)
 {
@@ -644,6 +648,8 @@ void ApplicationCore::StartDraggingBackground()
 {
     bgDragging = true;
 }
+
+// TODO: handle the background as a class, so it can have choosable color, and methods for moving, resizing, and so on
 
 void ApplicationCore::DraggingBackground()
 {

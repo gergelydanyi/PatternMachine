@@ -2,6 +2,9 @@
 
 namespace PatternMachine
 {
+
+	// TODO: add inner color
+
 	RECT Shape::BoundingRectangle()
 	{
 		RECT rc;
