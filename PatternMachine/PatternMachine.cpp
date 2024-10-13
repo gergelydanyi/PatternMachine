@@ -899,10 +899,11 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, ApplicationCore appCore)
 {
    hInst = hInstance; // Store instance handle in our global variable
-
+   HMENU hMenu = LoadMenuW(hInstance, MAKEINTRESOURCEW(IDC_PATTERNMACHINE));
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, 1000, 1000, nullptr, nullptr, hInstance, &appCore);
+      CW_USEDEFAULT, 0, 1000, 1000, nullptr, hMenu, hInstance, &appCore);
    appCore.mainWindow = hWnd;
+   appCore.menuBar = hMenu;
 
    if (!hWnd)
    {
@@ -971,6 +972,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Parse the menu selections:
             switch (wmId)
             {
+            case ID_EDIT_COPY:
+                pAppCore->CopyToClipboard();
+                break;
             case ID_SHAPE_RECTANGLE:
                 pAppCore->SelectShapeType(ShapeType::RectangleShapeType);
                 break;
@@ -1073,6 +1077,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_PEN_30:
                 pAppCore->penWidth = 30;
                 break;
+            // TODO: put this case into a separate method
             case ID_COLOR_BORDER:
             {
                 HGLOBAL hgbl;
@@ -1155,6 +1160,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_MOUSEMOVE:
         pAppCore->On_WM_MOUSEMOVE(lParam);
         break;
+        // TODO: remove this case, because it is now implemented in a menu, connected with an accelerator
     case WM_KEYDOWN:
         if (wParam == 0x43)
         {

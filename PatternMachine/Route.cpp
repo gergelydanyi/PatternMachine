@@ -92,7 +92,7 @@ void Route::SetSubRoute(POINT p1, POINT p2)
 {
 	double d = Distance(p1, p2);
 	
-	if (d > 20)
+	if (d > 2)
 	{
 		std::vector<POINT> temp_vector;
 		long subx;

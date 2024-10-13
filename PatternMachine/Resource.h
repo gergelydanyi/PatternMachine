@@ -49,6 +49,37 @@
 #define ID_PEN_29                       32804
 #define ID_PEN_30                       32805
 #define ID_SHAPE_ROUTE                  32806
+#define ID_DRAW_SHAPES                  32807
+#define ID_DRAW_LINES                   32808
+#define ID_SHAPES_TRIANGLE              32809
+#define ID_SHAPES_RECTANGLE             32810
+#define ID_SHAPES_ELLIPSE               32811
+#define ID_SHAPES_POLYGON               32812
+#define ID_POLYGON_5                    32813
+#define ID_POLYGON_6                    32814
+#define ID_POLYGON_7                    32815
+#define ID_POLYGON_8                    32816
+#define ID_POLYGON_9                    32817
+#define ID_POLYGON_10                   32818
+#define ID_LINES_STRAIGHT               32819
+#define ID_LINES_ARC                    32820
+#define ID_LINES_ROUTE                  32821
+#define ID_LINES_BEZIER                 32822
+#define ID_LINES_FREEHAND               32823
+#define ID_PEN_WIDTH                    32824
+#define ID_PEN_STYLE                    32825
+#define ID_EDIT_COPY                    32826
+#define ID_EDIT_PASTE                   32827
+#define ID_EDIT_DELETE                  32828
+#define ID_FILE_OPEN                    32829
+#define ID_FILE_SAVE                    32830
+#define ID_FILE_SAVEAS                  32831
+#define ID_FILE_CONVERT                 32832
+#define ID_CONVERTTO_BMP                32833
+#define ID_CONVERTTO_JPG                32834
+#define ID_CONVERTTO_GIF                32835
+#define ID_CONVERTTO_P                  32836
+#define ID_FILE_LOAD                    32837
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -57,7 +88,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        130
-#define _APS_NEXT_COMMAND_VALUE         32807
+#define _APS_NEXT_COMMAND_VALUE         32842
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

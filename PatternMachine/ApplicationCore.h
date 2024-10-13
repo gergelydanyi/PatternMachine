@@ -19,6 +19,7 @@ public:
 	ApplicationCore();
 	MouseInfo mouse;
 	HWND mainWindow;
+	HMENU menuBar;
 	void On_WM_LBUTTONDOWN(LPARAM);
 	void On_WM_LBUTTONUP(LPARAM);
 	void On_WM_RBUTTONDOWN(LPARAM);

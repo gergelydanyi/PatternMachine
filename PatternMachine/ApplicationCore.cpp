@@ -52,6 +52,8 @@ void ApplicationCore::On_WM_MOUSEMOVE(LPARAM lParam)
 
 void ApplicationCore::On_WM_PAINT()
 {
+    // TODO: Move the below list before the winmain function in the application
+
     // TODO: Adding capability of drawing shapes with the following options
     //       - let the color of the interior be selectable
     //       - can select the color of the frame
@@ -68,6 +70,9 @@ void ApplicationCore::On_WM_PAINT()
     //      - add undo/redo option
     //      - differentiate the individual shapes as objects
     //      - can copy-paste objects
+    //      - TAB button is used to switch the editable parameter during drawing
+    //          - ex. in case of a rectangle TAB switches between sizing and rotating
+    //          - mouse cursor can indicate the actual editing mode
     //      - can move and resize the shapes (it requires that those are objects)
     //      - the shapes are parameterizable, angles can be set in polygons, number of vertices can be changed and so on
     //      - all-in-all object can be edited, copied, deleted and so on
