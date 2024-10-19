@@ -99,7 +99,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // Store instance handle in our global variable
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+      1, 1, 1, 1, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {

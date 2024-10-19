@@ -7,6 +7,11 @@
 #include <time.h>
 #include <string>>
 
+// Including is necessary for using common control elements, toolbox and imagelist here.
+// (Why is it not included in framework.h? Maybe because it is not part of SDK)
+// TODO: consider placing toolbar creation in a separate unit
+#include <CommCtrl.h>
+#include "shlwapi.h"
 
 #define MAX_LOADSTRING 100
 
@@ -14,6 +19,8 @@
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+HIMAGELIST g_hImageList = NULL;
+HIMAGELIST g_hImageList2 = NULL;
 ApplicationCore appCore; // TODO: do not use a global variable for this
 
 // Logging into textfile:
@@ -817,13 +824,159 @@ void CloseLog()
     CloseHandle(hLogFile);
 }
 
+#define PACKVERSION(major,minor) MAKELONG(minor,major)
+
+DWORD GetVersion(LPCTSTR lpszDllName)
+{
+    HINSTANCE hinstDll;
+    DWORD dwVersion = 0;
+
+    // For security purposes, LoadLibrary should be provided with a fully qualified 
+    // path to the DLL. The lpszDllName variable should be tested to ensure that it 
+    // is a fully qualified path before it is used. 
+    hinstDll = LoadLibrary(lpszDllName);
+
+    if (hinstDll)
+    {
+        DLLGETVERSIONPROC pDllGetVersion;
+        pDllGetVersion = (DLLGETVERSIONPROC)GetProcAddress(hinstDll, "DllGetVersion");
+
+        // Because some DLLs might not implement this function, you must test for 
+        // it explicitly. Depending on the particular DLL, the lack of a DllGetVersion 
+        // function can be a useful indicator of the version. 
+
+        if (pDllGetVersion)
+        {
+            DLLVERSIONINFO dvi;
+            HRESULT hr;
+
+            ZeroMemory(&dvi, sizeof(dvi));
+            dvi.cbSize = sizeof(dvi);
+
+            hr = (*pDllGetVersion)(&dvi);
+
+            if (SUCCEEDED(hr))
+            {
+                dwVersion = PACKVERSION(dvi.dwMajorVersion, dvi.dwMinorVersion);
+            }
+        }
+        FreeLibrary(hinstDll);
+    }
+    return dwVersion;
+}
+
+HWND CreateSimpleToolBar(HWND hWndParent)
+{
+    const int ImageListID = 0;
+    const int numButtons = 3;
+    const int bitmapSize = 16;
+
+    const DWORD buttonStyles = BTNS_AUTOSIZE;
+
+    HWND hWndToolbar;
+    hWndToolbar = CreateWindowExW(0L, TOOLBARCLASSNAMEW, NULL, WS_CHILD | TBSTYLE_WRAPABLE | CCS_NOPARENTALIGN, 0, 0, 0, 0, hWndParent, (HMENU)(int)101, hInst, NULL);
+    if (hWndToolbar == NULL)
+    {
+        return NULL;
+    }
+    g_hImageList = ImageList_Create(bitmapSize, bitmapSize, ILC_COLOR16 | ILC_MASK, numButtons, 0);
+    SendMessage(hWndToolbar, TB_SETIMAGELIST, (WPARAM)ImageListID, (LPARAM)g_hImageList);
+    SendMessage(hWndToolbar, TB_LOADIMAGES, (WPARAM)IDB_STD_SMALL_COLOR, (LPARAM)HINST_COMMCTRL);
+/*    TBBUTTON tbButtons[numButtons] =
+    {
+        { MAKELONG(STD_FILENEW,  ImageListID), ID_FILE_NEW,  TBSTATE_ENABLED, buttonStyles, {0}, 0, (INT_PTR)L"New" },
+        { MAKELONG(STD_FILEOPEN, ImageListID), ID_FILE_OPEN, TBSTATE_ENABLED, buttonStyles, {0}, 0, (INT_PTR)L"Open"},
+        { MAKELONG(STD_FILESAVE, ImageListID), ID_FILE_SAVE, 0,               buttonStyles, {0}, 0, (INT_PTR)L"Save"}
+    };*/
+    TBBUTTON tbButtons[numButtons] =
+    {
+        { MAKELONG(STD_FILENEW,  ImageListID), ID_FILE_NEW,  TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
+        { MAKELONG(STD_FILEOPEN, ImageListID), ID_FILE_OPEN, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
+        { MAKELONG(STD_FILESAVE, ImageListID), ID_FILE_SAVE, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0}
+    };
+    SendMessage(hWndToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+    SendMessage(hWndToolbar, TB_ADDBUTTONS, (WPARAM)numButtons, (LPARAM)&tbButtons);
+    SendMessage(hWndToolbar, TB_SETANCHORHIGHLIGHT, (WPARAM)TRUE, 0);
+    SendMessage(hWndToolbar, TB_AUTOSIZE, 0, 0);
+    ShowWindow(hWndToolbar, TRUE);
+    return hWndToolbar;
+    //UpdateWindow(hWndToolbar);
+}
+
+HWND CreateShapesToolBar(HWND hWndParent)
+{
+    const int ImageListID = 0;
+    const int numButtons = 3;
+    const int bitmapSize = 16;
+
+    const DWORD buttonStyles = BTNS_AUTOSIZE;
+    HWND hWndToolbar = CreateWindowExW(0L, TOOLBARCLASSNAMEW, L"Shapes", WS_CHILD | TBSTYLE_WRAPABLE | CCS_NOPARENTALIGN, 0, 0, 0, 0, hWndParent, (HMENU)(int)102, hInst, NULL);
+    if (hWndToolbar == NULL)
+    {
+        return NULL;
+    }
+    g_hImageList2 = ImageList_Create(bitmapSize, bitmapSize, ILC_COLOR24 | ILC_MASK, numButtons, 0);
+
+    HDC clientDC = GetDC(hWndParent);
+    HDC memoryDC = CreateCompatibleDC(clientDC);
+    HBITMAP hBitmap = CreateCompatibleBitmap(clientDC, bitmapSize * numButtons, bitmapSize);
+    HGDIOBJ hOrigBitmap = SelectObject(memoryDC, hBitmap);
+    RECT rect = { 0, 0, 48, 16 };
+    HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 0) | 0x00000001);
+    HPEN hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+    SelectObject(memoryDC, hBrush);
+    SelectObject(memoryDC, hPen);
+    FillRect(memoryDC, &rect, hBrush);
+    Rectangle(memoryDC, 2, 3, 14, 13);
+    MoveToEx(memoryDC, 16 + 2, 3, NULL);
+    LineTo(memoryDC, 16 + 4, 5);
+    LineTo(memoryDC, 16 + 8, 7);
+    Ellipse(memoryDC, 32 + 2, 4, 32 + 14, 12);
+    /*for (int i = 0; i < 16; ++i)
+    {
+        for (int j = 0; j < 16; ++j)
+        {
+            SetPixelV(memoryDC, i, j, 0x00ff0000);
+            SetPixelV(memoryDC, i, j, 0xffff0000);
+        }
+    }*/
+    SelectObject(memoryDC, hOrigBitmap);
+    if (ImageList_AddMasked(g_hImageList2, hBitmap, (COLORREF)0X00000001) == -1)
+    {
+        return NULL;
+    }
+    //if (ImageList_Add(g_hImageList2, hBitmap, NULL) == -1)
+    //{
+    //    return NULL;
+    //}
+
+    SendMessage(hWndToolbar, TB_SETIMAGELIST, (WPARAM)ImageListID, (LPARAM)g_hImageList2);
+    TBBUTTON tbButtons[numButtons] =
+    {
+        { MAKELONG(0, ImageListID), ID_SHAPE_RECTANGLE,  TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
+        { MAKELONG(1, ImageListID), ID_SHAPE_FREEHAND, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
+        { MAKELONG(2, ImageListID), ID_SHAPE_ROUTE, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0}
+    };
+    SendMessage(hWndToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+    SendMessage(hWndToolbar, TB_ADDBUTTONS, (WPARAM)numButtons, (LPARAM)&tbButtons);
+    //SendMessage(hWndToolbar, TB_SETANCHORHIGHLIGHT, (WPARAM)TRUE, 0);
+    //SendMessage(hWndToolbar, TB_AUTOSIZE, 0, 0);
+    ShowWindow(hWndToolbar, TRUE);
+
+    DeleteObject(hBrush);
+    DeleteObject(hBitmap);
+    ReleaseDC(hWndParent, memoryDC);
+    ReleaseDC(hWndParent, clientDC);
+
+    return hWndToolbar;
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
 {
-    
+    //InitCommonControls(); it is necessary for toolbar according to 'microsoft learn'
     srand(time(0)); 
     hLogFile = OpenLog();
     UNREFERENCED_PARAMETER(hPrevInstance);
@@ -840,6 +993,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         return FALSE;
     }
+    /*HWND toolBar = CreateSimpleToolBar(appCore.mainWindow);
+    if (toolBar == NULL)
+    {
+        return FALSE;
+    }
+    ShowWindow(toolBar, TRUE);
+    UpdateWindow(toolBar);*/
+    //hWndToolbar = 
+  // CreateWindowExW(0L, TOOLBARCLASSNAMEW, NULL, WS_CHILD | WS_VISIBLE | TBSTYLE_WRAPABLE, 0, 0, 0, 0, appCore.mainWindow, NULL, hInst, NULL);
+    //HWND hWndToolbar =
+    //CreateWindowExW(0L, TOOLBARCLASSNAMEW, szTitle, 0, 0, 0, 500, 500, nullptr, NULL, hInstance, NULL);
+    //ShowWindow(hWndToolbar, nCmdShow);
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PATTERNMACHINE));
 
@@ -879,6 +1044,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PATTERNMACHINE));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
+    //wcex.hbrBackground = (HBRUSH)(RGB(255, 150, 150));
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PATTERNMACHINE);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -901,7 +1067,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, ApplicationCore appCore)
    hInst = hInstance; // Store instance handle in our global variable
    HMENU hMenu = LoadMenuW(hInstance, MAKEINTRESOURCEW(IDC_PATTERNMACHINE));
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, 1000, 1000, nullptr, hMenu, hInstance, &appCore);
+      100, 100, 400, 300, nullptr, hMenu, hInstance, &appCore);
    appCore.mainWindow = hWnd;
    appCore.menuBar = hMenu;
 
@@ -958,6 +1124,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         CREATESTRUCTW* pcs = reinterpret_cast<CREATESTRUCTW*>(lParam);
         pAppCore = reinterpret_cast<ApplicationCore*>(pcs->lpCreateParams);
         SetWindowLongPtrW(hWnd, GWLP_USERDATA, (LONG_PTR)pAppCore);
+
+        HWND shapesToolBar = CreateShapesToolBar(hWnd);
+        if (shapesToolBar == NULL)
+        {
+            return FALSE;
+        }
+        SetWindowPos(shapesToolBar, HWND_TOP, 70, -58, 100, 16, SWP_NOOWNERZORDER);
+        ShowWindow(shapesToolBar, SW_SHOWNORMAL);
+        UpdateWindow(shapesToolBar);
+
+        HWND fileToolBar = CreateSimpleToolBar(hWnd);
+        SetWindowPos(fileToolBar, HWND_TOP, 0, -6, 70, 16, SWP_NOOWNERZORDER);
+        ShowWindow(fileToolBar, SW_SHOWNORMAL);
+        UpdateWindow(fileToolBar);
     }
     else
     {
