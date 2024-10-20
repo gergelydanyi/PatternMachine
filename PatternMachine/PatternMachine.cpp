@@ -1,3 +1,40 @@
+// DONE: Move the below list before the winmain function in the application
+
+// TODOS:
+
+// TODO: Adding capability of drawing shapes with the following options
+//       - let the color of the interior be selectable
+//       - can select the color of the frame
+// later options:
+//      - can draw lines and curves
+//          - as many parameters as possible can be set during drawing:
+//            ex. pressing Ctrl-key enables rotating the shape during drawing,
+//            or pressing the right mouse button enables moving a shape before finishing drawing (so before releasing left button)
+//      - can select pens, brushes and colors
+//      - can create bitmaps and reuse them in drawing and painting
+//      - can edit bitmaps pixel by pixel
+//      - save the state of the drawing
+//      - save the drawing as a picture in different file formats
+//      - add undo/redo option
+//      - differentiate the individual shapes as objects
+//      - can copy-paste objects
+//      - TAB button is used to switch the editable parameter during drawing
+//          - ex. in case of a rectangle TAB switches between sizing and rotating
+//          - mouse cursor can indicate the actual editing mode
+//      - can move and resize the shapes (it requires that those are objects)
+//      - the shapes are parameterizable, angles can be set in polygons, number of vertices can be changed and so on
+//      - all-in-all object can be edited, copied, deleted and so on
+//      - edit can be performed on more objects at the same time
+//      - the final goal is to have a tool which can create patterns from objects (shapes) by giving a rule or ruleset for generating them
+//      - this pattern generation is performed by creating rules
+//      - rules can be ex. functions for setting the size, rotation or color of the shape
+//      - rules can be applied after combining them, as real functions
+//      - function can be applied for everything, ex. angle of lines in shapes, a color of a pixel in a bitmap and so on
+//      - perhaps later the whole ruleset can get a mathematical formulation
+//      
+//      - multithreading
+
+
 // PatternMachine.cpp : Defines the entry point for the application.
 //
 
@@ -915,7 +952,7 @@ HWND CreateShapesToolBar(HWND hWndParent)
     {
         return NULL;
     }
-    g_hImageList2 = ImageList_Create(bitmapSize, bitmapSize, ILC_COLOR24 | ILC_MASK, numButtons, 0);
+    g_hImageList = ImageList_Create(bitmapSize, bitmapSize, ILC_COLOR24 | ILC_MASK, numButtons, 0);
 
     HDC clientDC = GetDC(hWndParent);
     HDC memoryDC = CreateCompatibleDC(clientDC);
@@ -932,25 +969,13 @@ HWND CreateShapesToolBar(HWND hWndParent)
     LineTo(memoryDC, 16 + 4, 5);
     LineTo(memoryDC, 16 + 8, 7);
     Ellipse(memoryDC, 32 + 2, 4, 32 + 14, 12);
-    /*for (int i = 0; i < 16; ++i)
-    {
-        for (int j = 0; j < 16; ++j)
-        {
-            SetPixelV(memoryDC, i, j, 0x00ff0000);
-            SetPixelV(memoryDC, i, j, 0xffff0000);
-        }
-    }*/
     SelectObject(memoryDC, hOrigBitmap);
-    if (ImageList_AddMasked(g_hImageList2, hBitmap, (COLORREF)0X00000001) == -1)
+    if (ImageList_AddMasked(g_hImageList, hBitmap, (COLORREF)0X00000001) == -1)
     {
         return NULL;
     }
-    //if (ImageList_Add(g_hImageList2, hBitmap, NULL) == -1)
-    //{
-    //    return NULL;
-    //}
 
-    SendMessage(hWndToolbar, TB_SETIMAGELIST, (WPARAM)ImageListID, (LPARAM)g_hImageList2);
+    SendMessage(hWndToolbar, TB_SETIMAGELIST, (WPARAM)ImageListID, (LPARAM)g_hImageList);
     TBBUTTON tbButtons[numButtons] =
     {
         { MAKELONG(0, ImageListID), ID_SHAPE_RECTANGLE,  TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
@@ -959,8 +984,6 @@ HWND CreateShapesToolBar(HWND hWndParent)
     };
     SendMessage(hWndToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
     SendMessage(hWndToolbar, TB_ADDBUTTONS, (WPARAM)numButtons, (LPARAM)&tbButtons);
-    //SendMessage(hWndToolbar, TB_SETANCHORHIGHLIGHT, (WPARAM)TRUE, 0);
-    //SendMessage(hWndToolbar, TB_AUTOSIZE, 0, 0);
     ShowWindow(hWndToolbar, TRUE);
 
     DeleteObject(hBrush);
@@ -993,18 +1016,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         return FALSE;
     }
-    /*HWND toolBar = CreateSimpleToolBar(appCore.mainWindow);
-    if (toolBar == NULL)
-    {
-        return FALSE;
-    }
-    ShowWindow(toolBar, TRUE);
-    UpdateWindow(toolBar);*/
-    //hWndToolbar = 
-  // CreateWindowExW(0L, TOOLBARCLASSNAMEW, NULL, WS_CHILD | WS_VISIBLE | TBSTYLE_WRAPABLE, 0, 0, 0, 0, appCore.mainWindow, NULL, hInst, NULL);
-    //HWND hWndToolbar =
-    //CreateWindowExW(0L, TOOLBARCLASSNAMEW, szTitle, 0, 0, 0, 500, 500, nullptr, NULL, hInstance, NULL);
-    //ShowWindow(hWndToolbar, nCmdShow);
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PATTERNMACHINE));
 
@@ -1124,12 +1135,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         CREATESTRUCTW* pcs = reinterpret_cast<CREATESTRUCTW*>(lParam);
         pAppCore = reinterpret_cast<ApplicationCore*>(pcs->lpCreateParams);
         SetWindowLongPtrW(hWnd, GWLP_USERDATA, (LONG_PTR)pAppCore);
-
+        // TODO: put toolbar creation in a separate method
         HWND shapesToolBar = CreateShapesToolBar(hWnd);
         if (shapesToolBar == NULL)
         {
             return FALSE;
         }
+        // TODO: calculate window positions
         SetWindowPos(shapesToolBar, HWND_TOP, 70, -58, 100, 16, SWP_NOOWNERZORDER);
         ShowWindow(shapesToolBar, SW_SHOWNORMAL);
         UpdateWindow(shapesToolBar);

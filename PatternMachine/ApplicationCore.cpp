@@ -52,39 +52,6 @@ void ApplicationCore::On_WM_MOUSEMOVE(LPARAM lParam)
 
 void ApplicationCore::On_WM_PAINT()
 {
-    // TODO: Move the below list before the winmain function in the application
-
-    // TODO: Adding capability of drawing shapes with the following options
-    //       - let the color of the interior be selectable
-    //       - can select the color of the frame
-    // later options:
-    //      - can draw lines and curves
-    //          - as many parameters as possible can be set during drawing:
-    //            ex. pressing Ctrl-key enables rotating the shape during drawing,
-    //            or pressing the right mouse button enables moving a shape before finishing drawing (so before releasing left button)
-    //      - can select pens, brushes and colors
-    //      - can create bitmaps and reuse them in drawing and painting
-    //      - can edit bitmaps pixel by pixel
-    //      - save the state of the drawing
-    //      - save the drawing as a picture in different file formats
-    //      - add undo/redo option
-    //      - differentiate the individual shapes as objects
-    //      - can copy-paste objects
-    //      - TAB button is used to switch the editable parameter during drawing
-    //          - ex. in case of a rectangle TAB switches between sizing and rotating
-    //          - mouse cursor can indicate the actual editing mode
-    //      - can move and resize the shapes (it requires that those are objects)
-    //      - the shapes are parameterizable, angles can be set in polygons, number of vertices can be changed and so on
-    //      - all-in-all object can be edited, copied, deleted and so on
-    //      - edit can be performed on more objects at the same time
-    //      - the final goal is to have a tool which can create patterns from objects (shapes) by giving a rule or ruleset for generating them
-    //      - this pattern generation is performed by creating rules
-    //      - rules can be ex. functions for setting the size, rotation or color of the shape
-    //      - rules can be applied after combining them, as real functions
-    //      - function can be applied for everything, ex. angle of lines in shapes, a color of a pixel in a bitmap and so on
-    //      - perhaps later the whole ruleset can get a mathematical formulation
-    //      
-    //      - multithreading
     PAINTSTRUCT ps;
     clientDC = BeginPaint(mainWindow, &ps);
     // This is only for DEBUG
