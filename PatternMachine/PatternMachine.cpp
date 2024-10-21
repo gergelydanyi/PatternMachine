@@ -959,7 +959,16 @@ HWND CreateShapesToolBar(HWND hWndParent)
     const int bitmapSize = 16;
 
     const DWORD buttonStyles = BTNS_AUTOSIZE;
-    HWND hWndToolbar = CreateWindowExW(0L, TOOLBARCLASSNAMEW, L"Shapes", WS_CHILD | TBSTYLE_WRAPABLE /* | CCS_NOPARENTALIGN*/, 0, 0, 0, 0, hWndParent, NULL/*(HMENU)(int)102*/, hInst, NULL);
+    HWND hWndToolbar = CreateWindowExW(
+        WS_EX_TOOLWINDOW,
+        TOOLBARCLASSNAMEW,
+        L"Shapes",
+        WS_CHILD | WS_OVERLAPPED | WS_VISIBLE /* | TBSTYLE_WRAPABLE */ | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NODIVIDER,
+        0, 0, 0, 0,
+        hWndParent,
+        NULL/*(HMENU)(int)102*/,
+        hInst,
+        NULL);
     if (hWndToolbar == NULL)
     {
         return NULL;
@@ -1136,7 +1145,7 @@ LPWORD lpwAlign(LPWORD &lpIn)
     return (LPWORD)ull;
 }
 
-HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox)
+HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox1, HWND hWndComboBox2)
 {
     int numButtons = 3;
     INITCOMMONCONTROLSEX icex;
@@ -1144,7 +1153,7 @@ HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox)
     icex.dwICC = ICC_COOL_CLASSES | ICC_BAR_CLASSES;
     InitCommonControlsEx(&icex);
 
-    HWND hWndReBar = CreateWindowExW(
+    HWND hWndRebar = CreateWindowExW(
         WS_EX_TOOLWINDOW,
         REBARCLASSNAME,
         NULL,
@@ -1154,54 +1163,73 @@ HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox)
         NULL/*(HMENU)(int)101*/,
         hInst,
         NULL);
-    if (!hWndReBar)
+    if (!hWndRebar)
     {
         return NULL;
     }
-    //REBARINFO rb;
-    //rb.cbSize = sizeof(REBARINFO);
-    //rb.fMask = 0;
-    //rb.himl = 0;
-    //LRESULT lres = SendMessageW(hWndReBar, RB_SETBARINFO, (WPARAM)0, (LPARAM) & rb);
+    REBARINFO rb;
+    rb.cbSize = sizeof(REBARINFO);
+    rb.fMask = 0;
+    rb.himl = 0;
+    LRESULT lres = SendMessageW(hWndRebar, RB_SETBARINFO, (WPARAM)0, (LPARAM) & rb);
     //MessageBoxW(hWndOwner, std::to_wstring(lres).c_str(), NULL, NULL);
-    REBARBANDINFO rbBand;// = { sizeof(REBARBANDINFO) };
-    rbBand.cbSize = sizeof(REBARBANDINFO);
-    rbBand.fMask =
-        RBBIM_STYLE
-      | RBBIM_TEXT
-      | RBBIM_CHILD
-      | RBBIM_CHILDSIZE
-      | RBBIM_SIZE;
-    rbBand.fStyle = RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
-    DWORD dwBtnSize = (DWORD)SendMessageW(hWndToolbar, TB_GETBUTTONSIZE, 0, 0);
     wchar_t wct[5];
-    std::wstring ws = L"baND";
-    wcscpy_s(wct, ws.c_str());
-    rbBand.lpText = wct;
-    rbBand.hwndChild = hWndToolbar;
-    rbBand.cyChild = LOWORD(dwBtnSize);
-    rbBand.cxMinChild = numButtons* HIWORD(dwBtnSize);
-    rbBand.cyMinChild = LOWORD(dwBtnSize);
-    //rbBand.cyMaxChild = 100;
-    //rbBand.cyIntegral = 50;
-    rbBand.cx = 0;
-    SendMessageW(hWndReBar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
+    std::wstring ws;
+    REBARBANDINFO rbBand;
+    rbBand.cbSize = sizeof(REBARBANDINFO);
+    
+    hWndToolbar = CreateShapesToolBar(hWndRebar);
+    if (hWndToolbar != NULL)
+    {
+        rbBand.fMask = RBBIM_STYLE | RBBIM_TEXT | RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_SIZE;
+        rbBand.fStyle = RBBS_BREAK | RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
+        DWORD dwBtnSize = (DWORD)SendMessageW(hWndToolbar, TB_GETBUTTONSIZE, 0, 0);
+        ws = L"";
+        wcscpy_s(wct, ws.c_str());
+        rbBand.lpText = wct;
+        rbBand.hwndChild = hWndToolbar;
+        rbBand.cyChild = LOWORD(dwBtnSize);
+        rbBand.cxMinChild = numButtons* HIWORD(dwBtnSize);
+        rbBand.cyMinChild = LOWORD(dwBtnSize);
+        //rbBand.cyMaxChild = LOWORD(dwBtnSize);
+        //rbBand.cyIntegral = 50;
+        rbBand.cx = 0;
+        SendMessageW(hWndRebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
+        SendMessage(hWndToolbar, TB_AUTOSIZE, 0, 0);
+    } 
+    if (hWndComboBox1 != NULL)
+    {
+        RECT rc;
+        GetWindowRect(hWndComboBox1, &rc);
+        ws = L"";
+        wcscpy_s(wct, ws.c_str());
+        rbBand.fMask = RBBIM_STYLE | RBBIM_TEXT | RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_SIZE;
+        rbBand.fStyle = RBBS_BREAK | RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
+        rbBand.lpText = wct;
+        rbBand.hwndChild = hWndComboBox1;
+        rbBand.cxMinChild = 0;
+        rbBand.cyMaxChild = rc.bottom - rc.top;
+        rbBand.cx = 100;
+        SendMessageW(hWndRebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
+    }
 
-    //MessageBoxW(hWndOwner, std::to_wstring(lres).c_str(), NULL, NULL);
+    if (hWndComboBox2 != NULL)
+    {
+        RECT rc;
+        GetWindowRect(hWndComboBox2, &rc);
+        ws = L"";
+        wcscpy_s(wct, ws.c_str());
+        rbBand.fMask = RBBIM_STYLE | RBBIM_TEXT | RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_SIZE;
+        rbBand.fStyle = RBBS_BREAK | RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
+        rbBand.lpText = wct;
+        rbBand.hwndChild = hWndComboBox2;
+        rbBand.cxMinChild = 0;
+        rbBand.cyMaxChild = rc.bottom - rc.top;
+        rbBand.cx = 100;
+        SendMessageW(hWndRebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
+    }
 
-    RECT rc;
-    GetWindowRect(hWndComboBox, &rc);
-    ws = L"Font";
-    wcscpy_s(wct, ws.c_str());
-    rbBand.lpText = wct;
-    rbBand.hwndChild = hWndComboBox;
-    rbBand.cxMinChild = 0;
-    rbBand.cyMaxChild = rc.bottom - rc.top;
-    rbBand.cx = 100;
-    SendMessageW(hWndReBar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&rbBand);
-
-
-    return hWndReBar;
+    return hWndRebar;
 }
 
 HWND CreateComboBox(HWND hWndParent)
@@ -1228,12 +1256,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         pAppCore = reinterpret_cast<ApplicationCore*>(pcs->lpCreateParams);
         SetWindowLongPtrW(hWnd, GWLP_USERDATA, (LONG_PTR)pAppCore);
         // TODO: put toolbar creation in a separate method
-        HWND shapesToolBar = CreateShapesToolBar(hWnd);
-        if (shapesToolBar == NULL)
+        HWND shapesToolBar = NULL;// CreateShapesToolBar(hWnd);
+        /*if (shapesToolBar == NULL)
         {
             return FALSE;
-        }
-        HWND hWndComboBox = CreateComboBox(hWnd);
+        }*/
+        HWND hWndComboBox1 = CreateComboBox(hWnd);
+        HWND hWndComboBox2 = CreateComboBox(hWnd);
         // TODO: calculate window positions
         //SetWindowPos(shapesToolBar, HWND_TOP, 70, -38, 100, 16, SWP_NOOWNERZORDER);
         //ShowWindow(shapesToolBar, SW_SHOWNORMAL);
@@ -1243,11 +1272,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         //SetWindowPos(fileToolBar, HWND_TOP, 0, -6, 70, 16, SWP_NOOWNERZORDER);
         //ShowWindow(fileToolBar, SW_SHOWNORMAL);
         //UpdateWindow(fileToolBar);
-        HWND hWndReBar = CreateReBar(hWnd, shapesToolBar, hWndComboBox);
-        //ShowWindow(hWndReBar, SW_SHOWNORMAL);
-        //UpdateWindow(hWndReBar);
-        //SetWindowPos(hWndReBar, HWND_TOP, 10, 60, 70, 40, SWP_SHOWWINDOW);
-        //SendMessageW(hWndReBar, RB_MAXIMIZEBAND, 0, 0);
+        HWND hWndReBar = CreateReBar(hWnd, shapesToolBar, hWndComboBox1, hWndComboBox2);
+        //ShowWindow(hWndRebar, SW_SHOWNORMAL);
+        //UpdateWindow(hWndRebar);
+        //SetWindowPos(hWndRebar, HWND_TOP, 10, 60, 70, 40, SWP_SHOWWINDOW);
+        //SendMessageW(hWndRebar, RB_MAXIMIZEBAND, 0, 0);
 
     }
     else
