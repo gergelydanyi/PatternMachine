@@ -313,7 +313,7 @@ void ApplicationCore::CopyToClipboard()
     CloseClipboard();
 }
 
-// TODO: put the drawing methods in a new class, which is responsibel for drawing
+// TODO: put the drawing methods in a new class, which is responsible for drawing
 
 int ApplicationCore::DrawFrameRect()
 {
@@ -370,11 +370,8 @@ void ApplicationCore::DrawRoute()
         SelectObject(clientDC, hPen);
         if (routeShape.isEditing())
         {
-            //HBRUSH hBrush = CreateSolidBrush(borderColor);
-            //FrameRect(clientDC, &routeShape.rect, hBrush);
             MoveToEx(clientDC, routeShape.anchor.x, routeShape.anchor.y, NULL);
             LineTo(clientDC, routeShape.endPoint.x, routeShape.endPoint.y);
-            //DeleteObject(hBrush);
         }
         else
         {
