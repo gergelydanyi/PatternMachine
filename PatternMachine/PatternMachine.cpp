@@ -33,6 +33,27 @@
 //      - perhaps later the whole ruleset can get a mathematical formulation
 //      
 //      - multithreading (ex. for long drawing operations)
+//
+//      - Desired working of the colorpicker:
+//          - When moving the mouse over the color wheel, while left button is pressed,
+//            a small circle appears around the peek of the mouse cursor and three lines
+//            are pointing to the red, green and blue section of the wheel. The circle and
+//            the lines can be inverted, to be visible on every section of the wheel.
+//            On the end of the line the red, green and blue values are indicated ex. in a textbox.
+//          - When scrolling with the mouse scroll button on the wheel, the brightness of
+//            the color in the middle of the wheel is changed step by step from 0 (black) to 255(white).
+//            If the SHIFT key is pressed meanwhile, the value change is increased (ex. change 10 value
+//            in one step).
+//          - If both the SHIFT key and Left mouse button is pressed, the vertical moving of
+//            the mouse can change the value of brigthness
+//          - Another option instead of the three lines pointing in the RGB values is one slider
+//            from the center of the wheel to the pure color to the side of the wheel.
+//          - Additionally the selected color can be shown in another triangle. The color of the vertices
+//            of the triangle are the selected color, black and white, which are mixed along the sides
+//            and in the inside of the triangle. Practically the triangle is a section of the color cone.
+//          - If the Left mouse button is pressed, pressing the SHIFT key locks the slider
+//            in the color wheel, and the moving the mouse can change the brightness and
+//            saturation of the color in the triangle.
 
 
 // PatternMachine.cpp : Defines the entry point for the application.
@@ -1075,11 +1096,11 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hInstance      = hInstance;
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PATTERNMACHINE));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    //wcex.hbrBackground = (HBRUSH)(RGB(255, 150, 150));
+    //wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
+    wcex.hbrBackground  = CreateSolidBrush(RGB(255, 150, 150));
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PATTERNMACHINE);
     wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+    wcex.hIconSm        = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
     return RegisterClassExW(&wcex);
 }
@@ -1099,7 +1120,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, ApplicationCore appCore)
    hInst = hInstance; // Store instance handle in our global variable
    HMENU hMenu = LoadMenuW(hInstance, MAKEINTRESOURCEW(IDC_PATTERNMACHINE));
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      100, 100, 400, 300, nullptr, hMenu, hInstance, &appCore);
+      100, 100, 800, 600, nullptr, hMenu, hInstance, &appCore);
    appCore.mainWindow = hWnd;
    appCore.menuBar = hMenu;
 
@@ -1145,6 +1166,20 @@ LPWORD lpwAlign(LPWORD &lpIn)
     return (LPWORD)ull;
 }
 
+HWND CreateComboBox(HWND hWndParent)
+{
+    int xpos = 100;            // Horizontal position of the window.
+    int ypos = 100;            // Vertical position of the window.
+    int nwidth = 200;          // Width of the window
+    int nheight = 200;         // Height of the window
+
+    HWND hWndComboBox = CreateWindow(WC_COMBOBOX, TEXT(""),
+        CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,
+        xpos, ypos, nwidth, nheight, hWndParent, NULL, hInst,
+        NULL);
+    return hWndComboBox;
+}
+
 HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox1, HWND hWndComboBox2)
 {
     int numButtons = 3;
@@ -1178,11 +1213,12 @@ HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox1, HWND hWnd
     REBARBANDINFO rbBand;
     rbBand.cbSize = sizeof(REBARBANDINFO);
     
+    // toolbar must be created here, otherwise it is not aligned in the rebar
     hWndToolbar = CreateShapesToolBar(hWndRebar);
     if (hWndToolbar != NULL)
     {
         rbBand.fMask = RBBIM_STYLE | RBBIM_TEXT | RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_SIZE;
-        rbBand.fStyle = RBBS_BREAK | RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
+        rbBand.fStyle = RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
         DWORD dwBtnSize = (DWORD)SendMessageW(hWndToolbar, TB_GETBUTTONSIZE, 0, 0);
         ws = L"";
         wcscpy_s(wct, ws.c_str());
@@ -1204,7 +1240,7 @@ HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox1, HWND hWnd
         ws = L"";
         wcscpy_s(wct, ws.c_str());
         rbBand.fMask = RBBIM_STYLE | RBBIM_TEXT | RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_SIZE;
-        rbBand.fStyle = RBBS_BREAK | RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
+        rbBand.fStyle = RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
         rbBand.lpText = wct;
         rbBand.hwndChild = hWndComboBox1;
         rbBand.cxMinChild = 0;
@@ -1220,7 +1256,7 @@ HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox1, HWND hWnd
         ws = L"";
         wcscpy_s(wct, ws.c_str());
         rbBand.fMask = RBBIM_STYLE | RBBIM_TEXT | RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_SIZE;
-        rbBand.fStyle = RBBS_BREAK | RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
+        rbBand.fStyle = /*RBBS_BREAK | */RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
         rbBand.lpText = wct;
         rbBand.hwndChild = hWndComboBox2;
         rbBand.cxMinChild = 0;
@@ -1232,18 +1268,56 @@ HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox1, HWND hWnd
     return hWndRebar;
 }
 
-HWND CreateComboBox(HWND hWndParent)
+INT_PTR CreateColorPickerDialog(HWND hWndParent, ApplicationCore * pAppCore)
 {
-    int xpos = 100;            // Horizontal position of the window.
-    int ypos = 100;            // Vertical position of the window.
-    int nwidth = 200;          // Width of the window
-    int nheight = 200;         // Height of the window
+    HGLOBAL hgbl;
+    LPDLGTEMPLATE lpdt;
+    LPDLGITEMTEMPLATE lpdit;
+    LPWORD lpw;
+    LPWSTR lpwsz;
+    LRESULT ret;
+    int nchar;
 
-    HWND hWndComboBox = CreateWindow(WC_COMBOBOX, TEXT(""),
-        CBS_DROPDOWN | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,
-        xpos, ypos, nwidth, nheight, hWndParent, NULL, hInst,
-        NULL);
-    return hWndComboBox;
+    hgbl = GlobalAlloc(GMEM_ZEROINIT, 1024);
+    if (!hgbl)
+        return -1;
+
+    lpdt = (LPDLGTEMPLATE)GlobalLock(hgbl);
+
+    // Define a dialog box.
+
+    lpdt->style = WS_POPUP | WS_BORDER | WS_SYSMENU | DS_MODALFRAME | WS_CAPTION;
+    lpdt->cdit = 1;         // Number of controls
+    lpdt->x = 10;  lpdt->y = 10;
+    lpdt->cx = 300; lpdt->cy = 300;
+
+    lpw = (LPWORD)(lpdt + 1);
+    *lpw++ = 0;             // No menu
+    *lpw++ = 0;             // Predefined dialog box class (by default)
+
+    lpwsz = (LPWSTR)lpw;
+    nchar = 1 + MultiByteToWideChar(CP_ACP, 0, "My Dialog", -1, lpwsz, 50);
+    lpw += nchar;
+
+    //-----------------------
+    // Define an OK button.
+    //-----------------------
+    lpwAlign(lpw);    // Align DLGITEMTEMPLATE on DWORD boundary
+    lpdit = (LPDLGITEMTEMPLATE)lpw;
+    lpdit->x = 5; lpdit->y = 280;
+    lpdit->cx = 40; lpdit->cy = 15;
+    lpdit->id = IDOK;       // OK button identifier
+    lpdit->style = WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON;
+    lpw = (LPWORD)(lpdit + 1);
+    *lpw++ = 0xFFFF;
+    *lpw++ = 0x0080;        // Button class
+    lpwsz = (LPWSTR)lpw;
+    nchar = 1 + MultiByteToWideChar(CP_ACP, 0, "OK", -1, lpwsz, 50);
+    lpw += nchar;
+    *lpw++ = 0;             // No creation data
+    GlobalUnlock(hgbl);
+    INT_PTR color = DialogBoxIndirectParamW(hInst, (LPDLGTEMPLATE)hgbl, hWndParent, (DLGPROC)ColorPickerDialogProcess, (LPARAM)pAppCore);
+    GlobalFree(hgbl);
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -1307,6 +1381,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_SHAPE_ROUTE:
                 pAppCore->SelectShapeType(ShapeType::RouteShapeType);
                 break;
+            // TODO: replace these many cases with a dialog box, which gets the width of the pen
             case ID_PEN_1:
                 pAppCore->penWidth = 1;
                 break;
@@ -1397,9 +1472,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_PEN_30:
                 pAppCore->penWidth = 30;
                 break;
-            // TODO: put this case into a separate method
+            // DONE: put this case into a separate method
+            // TODO: replace this code with a resource definition
+            // TODO: display only the color wheel without the black background around it
+            // TODO: move the OK button on the left side
+            // TODO: add Cancel button
+            // TODO: add an indicator rectangle which displays the selected color
+            // TODO: add RGB and HSL trackbar controls
             case ID_COLOR_BORDER:
             {
+                //pAppCore->borderColor = 
+                    CreateColorPickerDialog(hWnd, pAppCore);
+                /*
                 HGLOBAL hgbl;
                 LPDLGTEMPLATE lpdt;
                 LPDLGITEMTEMPLATE lpdit;
@@ -1434,8 +1518,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 //-----------------------
                 lpwAlign(lpw);    // Align DLGITEMTEMPLATE on DWORD boundary
                 lpdit = (LPDLGITEMTEMPLATE)lpw;
-                lpdit->x = 220; lpdit->y = 280;
-                lpdit->cx = 80; lpdit->cy = 20;
+                lpdit->x = 5; lpdit->y = 280;
+                lpdit->cx = 40; lpdit->cy = 15;
                 lpdit->id = IDOK;       // OK button identifier
                 lpdit->style = WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON;
                 lpw = (LPWORD)(lpdit + 1);
@@ -1447,8 +1531,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 *lpw++ = 0;             // No creation data
                 GlobalUnlock(hgbl);
                 INT_PTR color = DialogBoxIndirectParam(hInst, (LPDLGTEMPLATE)hgbl, hWnd, (DLGPROC)ColorPickerDialogProcess, (LPARAM)pAppCore);
-                //pAppCore->borderColor = LOWORD(color);
                 GlobalFree(hgbl);
+                */
             }
                 break;
             case IDM_ABOUT:
@@ -1511,16 +1595,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 BOOL CALLBACK ColorPickerDialogProcess(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    // TODO: replace ApplicationCore with some other class or struct which is responsible
+    // for storing and handling data connected to this dialog. The RGB bitmap created in
+    // ApplicationCore can be stored in some other location maybe.
     ApplicationCore* pAppCore;
+    //COLORREF* pColor;
     if (message == WM_INITDIALOG)
     {
         pAppCore = reinterpret_cast<ApplicationCore*>(lParam);
+        //pColor = reinterpret_cast<COLORREF*>(lParam);
         SetWindowLongPtrW(hwndDlg, GWLP_USERDATA, (LONG_PTR)pAppCore);
+        //SetWindowLongPtrW(hwndDlg, GWLP_USERDATA, (LONG_PTR)pColor);
     }
     else
     {
         LONG_PTR lp = GetWindowLongPtrW(hwndDlg, GWLP_USERDATA);
         pAppCore = reinterpret_cast<ApplicationCore*>(lp);
+        //pColor = reinterpret_cast<COLORREF*>(lp);
     }
     switch (message)
     {
@@ -1529,28 +1620,30 @@ BOOL CALLBACK ColorPickerDialogProcess(HWND hwndDlg, UINT message, WPARAM wParam
         return TRUE;
         break;
     case WM_PAINT:
-    {
-        PAINTSTRUCT ps;
-        HDC clientDC = BeginPaint(hwndDlg, &ps);
-        RECT clientRect;
-        GetClientRect(hwndDlg, &clientRect);
-        BitBlt(clientDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, pAppCore->RGBDC, 0, 0, SRCCOPY);
-        DeleteDC(clientDC);
-        EndPaint(hwndDlg, &ps);
-        return TRUE;
-    }
+        {
+            PAINTSTRUCT ps;
+            HDC clientDC = BeginPaint(hwndDlg, &ps);
+            RECT clientRect;
+            GetClientRect(hwndDlg, &clientRect);
+            RECT colorWheelRect = { 0, 0, 512, 512 };
+            GdiTransparentBlt(clientDC, 5, 5, colorWheelRect.right - colorWheelRect.left, colorWheelRect.bottom - colorWheelRect.top, pAppCore->RGBDC, 0, 0, 512, 512, 0);
+            DeleteDC(clientDC);
+            EndPaint(hwndDlg, &ps);
+            return TRUE;
+        }
         break;
     case WM_MOUSEMOVE:
         return TRUE;
         break;
     case WM_LBUTTONUP:
         {
-        int x = LOWORD(lParam);
-        int y = HIWORD(lParam);
-        HDC clientDC = GetDC(hwndDlg);
-        COLORREF color = GetPixel(clientDC, x, y);
-        pAppCore->borderColor = color;
-        return TRUE;
+            // TODO: don't set the borderColor, instead return the color which is selected
+            int x = LOWORD(lParam);
+            int y = HIWORD(lParam);
+            HDC clientDC = GetDC(hwndDlg);
+            COLORREF color = GetPixel(clientDC, x, y);
+            pAppCore->borderColor = color;
+            return TRUE;
         }
         break;
     case WM_COMMAND:
@@ -1561,7 +1654,7 @@ BOOL CALLBACK ColorPickerDialogProcess(HWND hwndDlg, UINT message, WPARAM wParam
             return TRUE;
         case IDOK:
             {
-                COLORREF color = RGB(0, 255, 255);
+            COLORREF color = pAppCore->borderColor;// RGB(0, 255, 255);
                 EndDialog(hwndDlg, INT_PTR(color));
                 return TRUE;
             }

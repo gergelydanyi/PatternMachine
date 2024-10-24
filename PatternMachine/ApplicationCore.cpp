@@ -52,6 +52,8 @@ void ApplicationCore::On_WM_MOUSEMOVE(LPARAM lParam)
 
 void ApplicationCore::On_WM_PAINT()
 {
+    // TODO: add clipping to the client area, to prevent the controls (rebar with toolbar and comboboxes currently) to cover up the drawing area
+    // TODO: remove the debug and other unnecessary code parts
     PAINTSTRUCT ps;
     clientDC = BeginPaint(mainWindow, &ps);
     // This is only for DEBUG
@@ -156,7 +158,7 @@ void ApplicationCore::On_WM_SIZE()
         // This is only for DEBUG
         
         RECT rc = { 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top };
-        HBRUSH hbr = CreateSolidBrush(RGB(255, 255, 255));
+        HBRUSH hbr = CreateSolidBrush(RGB(255, 150, 150));
         FillRect(memoryDC, &rc, hbr);
         DeleteObject(hbr);
 //        SetRect(&rc, 240, 240, 485, 485);
@@ -416,14 +418,15 @@ void ApplicationCore::DrawRGB()
                 SetPixelV(RGBDC, 256 * 6 - 1 - i, j, RGB(r, b, g));
             }
         }*/
-        POINT center = { 256 + 5, 256 + 5 };
+        POINT translate = { 0, 0 };
+        POINT center = { 256 + translate.x, 256 + translate.y};
         int med;
         double slope;
         double atg;
-        int endGrey = 255;
-        for (int i = 5; i < 517; ++i)
+        int endGrey = 128;
+        for (int i = 0 + translate.x; i < 512 + translate.x; ++i)
         {
-            for (int j = 261 - 256; j < 773 - 256; ++j)
+            for (int j = 0 + translate.y; j < 512 + translate.y; ++j)
             {
                 POINT p = { i, j };
                 int d = Distance(p, center);
