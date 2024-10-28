@@ -1269,6 +1269,12 @@ HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox1, HWND hWnd
 }
 
 INT_PTR CreateColorPickerDialog(HWND hWndParent, ApplicationCore * pAppCore)
+    // TODO: replace this code with a resource definition
+    // TODO: display only the color wheel without the black background around it
+    // TODO: move the OK button on the left side
+    // TODO: add Cancel button
+    // TODO: add an indicator rectangle which displays the selected color
+    // TODO: add RGB and HSL trackbar controls
 {
     HGLOBAL hgbl;
     LPDLGTEMPLATE lpdt;
@@ -1472,67 +1478,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_PEN_30:
                 pAppCore->penWidth = 30;
                 break;
-            // DONE: put this case into a separate method
-            // TODO: replace this code with a resource definition
-            // TODO: display only the color wheel without the black background around it
-            // TODO: move the OK button on the left side
-            // TODO: add Cancel button
-            // TODO: add an indicator rectangle which displays the selected color
-            // TODO: add RGB and HSL trackbar controls
             case ID_COLOR_BORDER:
             {
                 //pAppCore->borderColor = 
                     CreateColorPickerDialog(hWnd, pAppCore);
-                /*
-                HGLOBAL hgbl;
-                LPDLGTEMPLATE lpdt;
-                LPDLGITEMTEMPLATE lpdit;
-                LPWORD lpw;
-                LPWSTR lpwsz;
-                LRESULT ret;
-                int nchar;
-
-                hgbl = GlobalAlloc(GMEM_ZEROINIT, 1024);
-                if (!hgbl)
-                    return -1;
-
-                lpdt = (LPDLGTEMPLATE)GlobalLock(hgbl);
-
-                // Define a dialog box.
-
-                lpdt->style = WS_POPUP | WS_BORDER | WS_SYSMENU | DS_MODALFRAME | WS_CAPTION;
-                lpdt->cdit = 1;         // Number of controls
-                lpdt->x = 10;  lpdt->y = 10;
-                lpdt->cx = 300; lpdt->cy = 300;
-
-                lpw = (LPWORD)(lpdt + 1);
-                *lpw++ = 0;             // No menu
-                *lpw++ = 0;             // Predefined dialog box class (by default)
-
-                lpwsz = (LPWSTR)lpw;
-                nchar = 1 + MultiByteToWideChar(CP_ACP, 0, "My Dialog", -1, lpwsz, 50);
-                lpw += nchar;
-
-                //-----------------------
-                // Define an OK button.
-                //-----------------------
-                lpwAlign(lpw);    // Align DLGITEMTEMPLATE on DWORD boundary
-                lpdit = (LPDLGITEMTEMPLATE)lpw;
-                lpdit->x = 5; lpdit->y = 280;
-                lpdit->cx = 40; lpdit->cy = 15;
-                lpdit->id = IDOK;       // OK button identifier
-                lpdit->style = WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON;
-                lpw = (LPWORD)(lpdit + 1);
-                *lpw++ = 0xFFFF;
-                *lpw++ = 0x0080;        // Button class
-                lpwsz = (LPWSTR)lpw;
-                nchar = 1 + MultiByteToWideChar(CP_ACP, 0, "OK", -1, lpwsz, 50);
-                lpw += nchar;
-                *lpw++ = 0;             // No creation data
-                GlobalUnlock(hgbl);
-                INT_PTR color = DialogBoxIndirectParam(hInst, (LPDLGTEMPLATE)hgbl, hWnd, (DLGPROC)ColorPickerDialogProcess, (LPARAM)pAppCore);
-                GlobalFree(hgbl);
-                */
             }
                 break;
             case IDM_ABOUT:

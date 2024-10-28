@@ -52,87 +52,18 @@ void ApplicationCore::On_WM_MOUSEMOVE(LPARAM lParam)
 
 void ApplicationCore::On_WM_PAINT()
 {
-    // TODO: add clipping to the client area, to prevent the controls (rebar with toolbar and comboboxes currently) to cover up the drawing area
-    // TODO: remove the debug and other unnecessary code parts
+    // DONE: add clipping to the client area, to prevent the controls (rebar with toolbar and comboboxes currently) to cover up the drawing area
+    // DONE: remove the debug and other unnecessary code parts
     PAINTSTRUCT ps;
     clientDC = BeginPaint(mainWindow, &ps);
-    // This is only for DEBUG
-    for (int i = 0; i < 5; ++i)
-    {
-        for (int j = 0; j < 5; ++j)
-        {
-            //RECT rc = { rcMemory.left + 250 + i * 50, rcMemory.top + j * 50, rcMemory.left + 275 + i * 50, rcMemory.top + 25 + j * 50 };
-            //RECT rc = { 300, 50, 400, 150 };
-            //HBRUSH hbr = CreateSolidBrush(RGB(0, 100, 100));
-            //FrameRect(memoryDC, &rc, hbr);
-            //DeleteObject(hbr);
-        }
-    }
-    // This is only for DEBUG
+
+    // TODO: calculate the clipping area accurately, based on the height of the rebar; store the handle of the rebar
+    HRGN hRgn = CreateRectRgn(0, 40, rcClient.right, rcClient.bottom);
+    SelectClipRgn(clientDC, hRgn);
     BitBlt(clientDC, 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, memoryDC, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, SRCCOPY);
-    //DrawRGB();
-    //BitBlt(clientDC, 10, 10, 256 * 6, 256 + 10 + 256 * 2, RGBDC, 0, 0, SRCCOPY);
-    // success variable is used only for DEBUG
-    int success = DrawFrameRect();
+    DrawFrameRect();
     DrawFreehand();
     DrawRoute();
-
-    // DEBUG
-    int debug = false;
-    if (debug)
-    {
-
-        RECT rc = { rcClient.left, rcClient.top, 200, 200 };
-        HBRUSH hbr = CreateSolidBrush(RGB(0, 20, 0));
-        FillRect(clientDC, &rc, hbr);
-        DeleteObject(hbr);
-        TextOutW(clientDC, rcClient.left + 10, rcClient.top + 0, L"KeyState: ", 8);
-        TextOutW(clientDC, rcClient.left + 10, rcClient.top + 30, L"RIGHT: ", 5);
-        TextOutW(clientDC, rcClient.left + 10, rcClient.top + 60, L"LEFT: ", 4);
-        TextOutW(clientDC, rcClient.left + 10, rcClient.top + 90, L"TOP: ", 3);
-        TextOutW(clientDC, rcClient.left + 10, rcClient.top + 120, L"BOTTOM: ", 6);
-        TextOutW(clientDC, rcClient.left + 10, rcClient.top + 150, L"lParam: ", 6);
-        TextOutW(clientDC, rcClient.left + 10, rcClient.top + 180, L"success: ", 7);
-        std::wstring ws;
-        wchar_t wct[20];
-        int sl;
-
-        ws = std::to_wstring(keyState);
-        wcscpy_s(wct, ws.c_str());
-        sl = std::wcslen(wct);
-        TextOutW(clientDC, rcClient.left + 100, rcClient.top + 0, wct, sl);
-
-        ws = std::to_wstring(rectangleShape.rect.right);
-        wcscpy_s(wct, ws.c_str());
-        sl = std::wcslen(wct);
-        TextOutW(clientDC, rcClient.left + 100, rcClient.top + 30, wct, sl);
-
-        ws = std::to_wstring(rectangleShape.rect.left);
-        wcscpy_s(wct, ws.c_str());
-        sl = std::wcslen(wct);
-        TextOutW(clientDC, rcClient.left + 100, rcClient.top + 60, wct, sl);
-
-        ws = std::to_wstring(rectangleShape.rect.top);
-        wcscpy_s(wct, ws.c_str());
-        sl = std::wcslen(wct);
-        TextOutW(clientDC, rcClient.left + 100, rcClient.top + 90, wct, sl);
-
-        ws = std::to_wstring(rectangleShape.rect.bottom);
-        wcscpy_s(wct, ws.c_str());
-        sl = std::wcslen(wct);
-        TextOutW(clientDC, rcClient.left + 100, rcClient.top + 120, wct, sl);
-
-        ws = std::to_wstring(mouse.lastlParam);
-        wcscpy_s(wct, ws.c_str());
-        sl = std::wcslen(wct);
-        TextOutW(clientDC, rcClient.left + 100, rcClient.top + 150, wct, sl);
-
-        ws = std::to_wstring(success);
-        wcscpy_s(wct, ws.c_str());
-        sl = std::wcslen(wct);
-        TextOutW(clientDC, rcClient.left + 100, rcClient.top + 180, wct, sl);
-    }
-    // DEBUG
 
     if (!(
         rectangleShape.isEditing() || routeShape.isEditing()
@@ -141,6 +72,7 @@ void ApplicationCore::On_WM_PAINT()
         BitBlt(memoryDC, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, clientDC, 0, 0, SRCCOPY);
     }
     EndPaint(mainWindow, &ps);
+    DeleteObject(hRgn);
 }
 
 void ApplicationCore::On_WM_SIZE()
@@ -296,7 +228,7 @@ void ApplicationCore::On_WM_HSCROLL()
 
 void ApplicationCore::On_WM_INITDIALOG()
 {
-    DrawRGB();
+    DrawColorWheel();
 }
 
 void ApplicationCore::CopyToClipboard()
@@ -319,7 +251,7 @@ void ApplicationCore::CopyToClipboard()
 
 int ApplicationCore::DrawFrameRect()
 {
-    // The following section draws a simple red square frame
+    // The following section draws a simple square frame
     int success = -10;
     if (!rectangleShape.isDrawn)
     {
@@ -392,7 +324,7 @@ void ApplicationCore::DrawRoute()
 
 }
 
-void ApplicationCore::DrawRGB()
+void ApplicationCore::DrawColorWheel()
 {
     if (RGBDC == NULL)
     {

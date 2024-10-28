@@ -53,7 +53,7 @@ private:
 	int DrawFrameRect();
 	void DrawFreehand();
 	void DrawRoute();
-	void DrawRGB();
+	void DrawColorWheel();
 
 	void StartDrawingShape();
 	void DrawingShape();
