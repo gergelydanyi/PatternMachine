@@ -34,8 +34,9 @@ public:
 	void CopyToClipboard();
 	void SelectShapeType(ShapeType);
 	HDC RGBDC;
-	COLORREF borderColor;
+	COLORREF penColor;
 	int penWidth;
+	int penStyle;
 private:
 	HDC clientDC;
 	HDC memoryDC;

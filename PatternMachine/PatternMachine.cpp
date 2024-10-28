@@ -103,6 +103,7 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int, ApplicationCore);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    PenSettingsDialogProcess(HWND, UINT, WPARAM, LPARAM);
 
 BOOL CALLBACK ColorPickerDialogProcess(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -1328,7 +1329,6 @@ INT_PTR CreateColorPickerDialog(HWND hWndParent, ApplicationCore * pAppCore)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    //Log(message, wParam, lParam);
     ApplicationCore* pAppCore;
     if (message == WM_CREATE)
     {
@@ -1336,28 +1336,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         pAppCore = reinterpret_cast<ApplicationCore*>(pcs->lpCreateParams);
         SetWindowLongPtrW(hWnd, GWLP_USERDATA, (LONG_PTR)pAppCore);
         // TODO: put toolbar creation in a separate method
-        HWND shapesToolBar = NULL;// CreateShapesToolBar(hWnd);
-        /*if (shapesToolBar == NULL)
-        {
-            return FALSE;
-        }*/
         HWND hWndComboBox1 = CreateComboBox(hWnd);
         HWND hWndComboBox2 = CreateComboBox(hWnd);
-        // TODO: calculate window positions
-        //SetWindowPos(shapesToolBar, HWND_TOP, 70, -38, 100, 16, SWP_NOOWNERZORDER);
-        //ShowWindow(shapesToolBar, SW_SHOWNORMAL);
-        //UpdateWindow(shapesToolBar);
-
-        //HWND fileToolBar = CreateSimpleToolBar(hWnd);
-        //SetWindowPos(fileToolBar, HWND_TOP, 0, -6, 70, 16, SWP_NOOWNERZORDER);
-        //ShowWindow(fileToolBar, SW_SHOWNORMAL);
-        //UpdateWindow(fileToolBar);
-        HWND hWndReBar = CreateReBar(hWnd, shapesToolBar, hWndComboBox1, hWndComboBox2);
-        //ShowWindow(hWndRebar, SW_SHOWNORMAL);
-        //UpdateWindow(hWndRebar);
-        //SetWindowPos(hWndRebar, HWND_TOP, 10, 60, 70, 40, SWP_SHOWWINDOW);
-        //SendMessageW(hWndRebar, RB_MAXIMIZEBAND, 0, 0);
-
+        HWND hWndReBar = CreateReBar(hWnd, NULL, hWndComboBox1, hWndComboBox2);
     }
     else
     {
@@ -1387,8 +1368,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_SHAPE_ROUTE:
                 pAppCore->SelectShapeType(ShapeType::RouteShapeType);
                 break;
-            // TODO: replace these many cases with a dialog box, which gets the width of the pen
-            case ID_PEN_1:
+            // DONE: replace these many cases with a dialog box, which gets the width of the pen
+            /*case ID_PEN_1:
                 pAppCore->penWidth = 1;
                 break;
             case ID_PEN_2:
@@ -1477,10 +1458,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
             case ID_PEN_30:
                 pAppCore->penWidth = 30;
+                break;*/
+            case ID_PEN_SETTINGS:
+                DialogBoxParamW(hInst, MAKEINTRESOURCE(IDD_PEN_SETTINGS), hWnd, PenSettingsDialogProcess, (LPARAM)pAppCore);
                 break;
             case ID_COLOR_BORDER:
             {
-                //pAppCore->borderColor = 
+                //pAppCore->penColor = 
                     CreateColorPickerDialog(hWnd, pAppCore);
             }
                 break;
@@ -1513,25 +1497,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_MOUSEMOVE:
         pAppCore->On_WM_MOUSEMOVE(lParam);
         break;
-        // TODO: remove this case, because it is now implemented in a menu, connected with an accelerator
+        // DONE: remove this case, because it is now implemented in a menu, connected with an accelerator
     case WM_KEYDOWN:
-        if (wParam == 0x43)
-        {
-            pAppCore->keyState = GetKeyState(VK_CONTROL)>>6;
-            if (pAppCore->keyState & -2)
-            {
-                pAppCore->CopyToClipboard();
-            }
-        }
         break;
     case WM_SIZE:
         pAppCore->On_WM_SIZE();
         break;
     case WM_VSCROLL:
-        // TODO: Add code
+        pAppCore->On_WM_VSCROLL();
         break;
     case WM_HSCROLL:
-        // TODO: Add code
+        pAppCore->On_WM_HSCROLL();
         break;
     case WM_DESTROY:
         PostQuitMessage(0);
@@ -1586,12 +1562,12 @@ BOOL CALLBACK ColorPickerDialogProcess(HWND hwndDlg, UINT message, WPARAM wParam
         break;
     case WM_LBUTTONUP:
         {
-            // TODO: don't set the borderColor, instead return the color which is selected
+            // TODO: don't set the penColor, instead return the color which is selected
             int x = LOWORD(lParam);
             int y = HIWORD(lParam);
             HDC clientDC = GetDC(hwndDlg);
             COLORREF color = GetPixel(clientDC, x, y);
-            pAppCore->borderColor = color;
+            pAppCore->penColor = color;
             return TRUE;
         }
         break;
@@ -1603,7 +1579,7 @@ BOOL CALLBACK ColorPickerDialogProcess(HWND hwndDlg, UINT message, WPARAM wParam
             return TRUE;
         case IDOK:
             {
-            COLORREF color = pAppCore->borderColor;// RGB(0, 255, 255);
+            COLORREF color = pAppCore->penColor;// RGB(0, 255, 255);
                 EndDialog(hwndDlg, INT_PTR(color));
                 return TRUE;
             }
@@ -1613,7 +1589,6 @@ BOOL CALLBACK ColorPickerDialogProcess(HWND hwndDlg, UINT message, WPARAM wParam
     }
 }
 
-// Message handler for about box.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
@@ -1627,6 +1602,78 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         {
             EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
+        }
+        break;
+    }
+    return (INT_PTR)FALSE;
+}
+
+
+INT_PTR CALLBACK PenSettingsDialogProcess(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    ApplicationCore* pAppCore;
+    if (msg == WM_INITDIALOG)
+    {
+        pAppCore = reinterpret_cast<ApplicationCore*>(lParam);
+        SetWindowLongPtrW(hDlg, GWLP_USERDATA, (LONG_PTR)pAppCore);
+    }
+    else
+    {
+        LONG_PTR lp = GetWindowLongPtrW(hDlg, GWLP_USERDATA);
+        pAppCore = reinterpret_cast<ApplicationCore*>(lp);
+    }
+    switch (msg)
+    {
+    case WM_INITDIALOG:
+    {
+        HWND hLst = GetDlgItem(hDlg, IDC_LIST_SIZE);
+        for (int i = 1; i <= 30; ++i)
+        {
+            SendMessageW(hLst, LB_ADDSTRING, 0, (LPARAM)std::to_wstring(i).c_str());
+        }
+        return (INT_PTR)TRUE;
+    }
+        break;
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
+        {
+        case IDC_BTN_CHANGE_COLOR:
+        {
+            CreateColorPickerDialog(hDlg, pAppCore);
+            HWND hCtl = GetDlgItem(hDlg, IDC_CURRENT_COLOR);
+            SendMessageW(hCtl, WM_ENABLE, TRUE, 0);
+        }
+            break;
+        case IDOK:
+        case IDCANCEL:
+        {
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+        break;
+        case IDC_LIST_SIZE:
+            if (HIWORD(wParam) == LBN_SELCHANGE)
+            {
+                HWND hLst = GetDlgItem(hDlg, IDC_LIST_SIZE);
+                pAppCore->penWidth = SendMessageW(hLst, LB_GETCURSEL, 0, 0) + 1;
+            }
+            break;
+        case IDC_LIST_TYPE:
+            break;
+        }
+        break;
+    case WM_DRAWITEM:
+        DRAWITEMSTRUCT* dis = reinterpret_cast<DRAWITEMSTRUCT*>(lParam);
+        if (dis->CtlID == IDC_CURRENT_COLOR)
+        {
+            HDC hDc = dis->hDC;
+            HPEN hPen = CreatePen(PS_SOLID, 1, 0);
+            HBRUSH hBrush = CreateSolidBrush(pAppCore->penColor);
+            HPEN hPenOld = (HPEN)SelectObject(hDc, hPen);
+            FillRect(hDc, &dis->rcItem, hBrush);
+            SelectObject(hDc, hPenOld);
+            DeleteObject(hBrush);
+            DeleteObject(hPen);
         }
         break;
     }

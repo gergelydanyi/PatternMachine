@@ -5,8 +5,9 @@
 
 ApplicationCore::ApplicationCore()
 {
-    borderColor = RGB(255, 0, 0);
+    penColor = RGB(255, 0, 0);
     penWidth = 20;
+    penStyle = PS_SOLID;
 }
 
 void ApplicationCore::On_WM_LBUTTONDOWN(LPARAM lParam)
@@ -52,8 +53,6 @@ void ApplicationCore::On_WM_MOUSEMOVE(LPARAM lParam)
 
 void ApplicationCore::On_WM_PAINT()
 {
-    // DONE: add clipping to the client area, to prevent the controls (rebar with toolbar and comboboxes currently) to cover up the drawing area
-    // DONE: remove the debug and other unnecessary code parts
     PAINTSTRUCT ps;
     clientDC = BeginPaint(mainWindow, &ps);
 
@@ -77,6 +76,9 @@ void ApplicationCore::On_WM_PAINT()
 
 void ApplicationCore::On_WM_SIZE()
 {
+    // TODO: remove the unnecessary parts used for debugging
+    // TODO: initialize memoryDC before this method, ex. during the creation of the window
+    // TODO: use a separate method to set the size of the bitmap, ex. in a separate class, where the background should take place
     if (memoryDC == NULL)
     {
         GetClientRect(mainWindow, &rcClient);
@@ -218,12 +220,12 @@ void ApplicationCore::On_WM_SIZE()
 
 void ApplicationCore::On_WM_VSCROLL()
 {
-
+    // TODO: Add code
 }
 
 void ApplicationCore::On_WM_HSCROLL()
 {
-
+    // TODO: Add code
 }
 
 void ApplicationCore::On_WM_INITDIALOG()
@@ -255,7 +257,7 @@ int ApplicationCore::DrawFrameRect()
     int success = -10;
     if (!rectangleShape.isDrawn)
     {
-        HBRUSH hBrush = CreateSolidBrush(borderColor);
+        HBRUSH hBrush = CreateSolidBrush(penColor);
         success = FrameRect(clientDC, &rectangleShape.rect, hBrush);
 
         if (!rectangleShape.isEditing())
@@ -271,7 +273,7 @@ void ApplicationCore::DrawFreehand()
 {
     if (freehandShape.isSizing)
     {
-        HPEN hPen = CreatePen(PS_SOLID, penWidth, borderColor);
+        HPEN hPen = CreatePen(PS_SOLID, penWidth, penColor);
         SelectObject(clientDC, hPen);
         if (freehandShape.previousPoint.x == freehandShape.currentPoint.x &&
             freehandShape.previousPoint.y == freehandShape.currentPoint.y)
@@ -299,7 +301,7 @@ void ApplicationCore::DrawRoute()
 {
     if (!routeShape.isDrawn)
     {
-        //HPEN hPen = CreatePen(PS_SOLID, penWidth, borderColor);
+        //HPEN hPen = CreatePen(PS_SOLID, penWidth, penColor);
         HPEN hPen = CreatePen(PS_SOLID, penWidth, RGB(rand() * 255 / RAND_MAX + 1, rand() * 255 / RAND_MAX + 1, rand() * 255 / RAND_MAX + 1));
         SelectObject(clientDC, hPen);
         if (routeShape.isEditing())

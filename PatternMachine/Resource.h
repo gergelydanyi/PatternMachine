@@ -13,6 +13,16 @@
 #define IDC_PATTERNMACHINE              109
 #define IDR_MAINFRAME                   128
 #define IDB_BITMAP1                     129
+#define IDD_PEN_SETTINGS                130
+#define IDC_LIST_SIZE                   1000
+#define IDC_LBL_WIDTH                   1001
+#define IDC_LBL_COLOR                   1003
+#define IDC_LBL_TYPE                    1004
+#define IDC_BTN_CHANGE_COLOR            1005
+#define IDC_LIST3                       1006
+#define IDC_LIST_TYPE                   1006
+#define IDC_CURRENT_COLOR               1007
+#define IDC_CUSTOM1                     1008
 #define ID_SHAPE_RECTANGLE              32771
 #define ID_SHAPE_LINE                   32772
 #define ID_SHAPE_FREEHAND               32773
@@ -81,6 +91,7 @@
 #define ID_CONVERTTO_P                  32836
 #define ID_FILE_LOAD                    32837
 #define ID_FILE_NEW                     32842
+#define ID_PEN_SETTINGS                 32845
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -88,9 +99,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        130
-#define _APS_NEXT_COMMAND_VALUE         32845
-#define _APS_NEXT_CONTROL_VALUE         1000
+#define _APS_NEXT_RESOURCE_VALUE        131
+#define _APS_NEXT_COMMAND_VALUE         32846
+#define _APS_NEXT_CONTROL_VALUE         1009
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

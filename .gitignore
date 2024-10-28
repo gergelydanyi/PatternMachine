@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /PatternMachine/comctl32.dll
 /PatternMachine/ComCtl32.Lib
+/PatternMachine/LOG.txt
