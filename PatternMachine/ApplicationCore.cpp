@@ -5,9 +5,11 @@
 
 ApplicationCore::ApplicationCore()
 {
-    penColor = RGB(255, 0, 0);
-    penWidth = 20;
+    penColor = RGB(0, 255, 0);
+    penWidth = 2;
     penStyle = PS_SOLID;
+    activePen = CreatePen(penStyle, penWidth, penColor);
+    bgColor = RGB(255, 0, 255);
 }
 
 void ApplicationCore::On_WM_LBUTTONDOWN(LPARAM lParam)
@@ -58,17 +60,28 @@ void ApplicationCore::On_WM_PAINT()
 
     // TODO: calculate the clipping area accurately, based on the height of the rebar; store the handle of the rebar
     HRGN hRgn = CreateRectRgn(0, 40, rcClient.right, rcClient.bottom);
-    SelectClipRgn(clientDC, hRgn);
-    BitBlt(clientDC, 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, memoryDC, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, SRCCOPY);
-    DrawFrameRect();
+    //SelectClipRgn(clientDC, hRgn);
+    // memoryDCfinal and memoryBitMapfinal added to prevent flickering while painting
+    // Formerly we painted directly to the screen after copying the previous bitmap stored in memory,
+    // now we paint into the memory (the Draw methods use memoryDCfinal), and after this the final picture is copied to the screen
+    BitBlt(memoryDCfinal, 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top, memoryDCstorage, 0, 0, SRCCOPY);
+    DrawRectangle();
     DrawFreehand();
     DrawRoute();
+    GdiTransparentBlt(memoryDCfinal, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, memoryDCdrawing, 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, RGB(1, 1, 1));
+    // reset the DC to transparent background color:
+    RECT rc = { 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top };
+    HBRUSH hbr = CreateSolidBrush(RGB(1, 1, 1));
+    FillRect(memoryDCdrawing, &rc, hbr);
+    DeleteObject(hbr);
+    // ---------------------------------------------
+    BitBlt(clientDC, 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, memoryDCfinal, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, SRCCOPY);
 
     if (!(
         rectangleShape.isEditing() || routeShape.isEditing()
         ))
     {
-        BitBlt(memoryDC, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, clientDC, 0, 0, SRCCOPY);
+        BitBlt(memoryDCstorage, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, clientDC, 0, 0, SRCCOPY);
     }
     EndPaint(mainWindow, &ps);
     DeleteObject(hRgn);
@@ -76,125 +89,45 @@ void ApplicationCore::On_WM_PAINT()
 
 void ApplicationCore::On_WM_SIZE()
 {
-    // TODO: remove the unnecessary parts used for debugging
-    // TODO: initialize memoryDC before this method, ex. during the creation of the window
+    // DONE: remove the unnecessary parts used for debugging
+    // TODO: initialize memoryDCstorage and memoryDCfinal before this method, ex. during the creation of the window
     // TODO: use a separate method to set the size of the bitmap, ex. in a separate class, where the background should take place
-    if (memoryDC == NULL)
+    if (memoryDCstorage == NULL)
     {
         GetClientRect(mainWindow, &rcClient);
         rcMemory = rcClient;
         OffsetRect(&rcMemory, rcMemory.left - rcMemory.right, rcMemory.top - rcMemory.bottom);
         HDC clntDC = GetDC(mainWindow);
-        memoryDC = CreateCompatibleDC(clntDC);
-        memoryBitMap = CreateCompatibleBitmap(clntDC, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top);
-        SelectObject(memoryDC, memoryBitMap);
-        BitBlt(memoryDC, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, clntDC, 0, 0, SRCCOPY);
-        // This is only for DEBUG
-        
-        RECT rc = { 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top };
-        HBRUSH hbr = CreateSolidBrush(RGB(255, 150, 150));
-        FillRect(memoryDC, &rc, hbr);
-        DeleteObject(hbr);
-//        SetRect(&rc, 240, 240, 485, 485);
-//        hbr = CreateSolidBrush(RGB(100, 200, 180));
-//        FillRect(memoryDC, &rc, hbr);
-        DeleteObject(hbr);
-        if (false)
-        {
-            //grid
-            int gridWidth = 20;
-            int lineWidth = 2;
-            for (int i = 0; i < rcClient.right - rcClient.left; ++i)
-            {
-                for (int j = 0; j < rcClient.bottom - rcClient.top; ++j)
-                {
-                    long r = 150;
-                    long g = 150;
-                    long b = 150;
-                    if ((i % gridWidth < gridWidth - lineWidth) && (j % gridWidth < gridWidth - lineWidth))
-                    {
-                        r = g = b = 150;
-                    }
-                    else
-                    {
-                        r = g = b = 130;
-                    }
-                    SetPixelV(memoryDC, i, j, RGB(r, g, b));
-                }
-            }
-            SetPixelV(memoryDC, 1, 1, RGB(255, 0, 0));
-            //grid
-        }
-        if (false)
-        {
-            // rectangles for example
-            int repeat = 5;
-            int side = 20;
-            for (int i = 0; i < repeat; ++i)
-            {
-                for (int j = 0; j < repeat; ++j)
-                {
-                    rc = { 3 + side * i,
-                           3 + side * j,
-                           3 + (side + 1) * i,
-                           3 + (side + 1) * j };
-                    HBRUSH hbrFrame = CreateSolidBrush(RGB(0, 0, 0));
-                    FrameRect(memoryDC, &rc, hbrFrame);
-                    DeleteObject(hbrFrame);
-
-                    rc = { 13 + side * i,
-                           3 + side * j,
-                           13 + (side + 1) * i,
-                           3 + (side + 1) * j };
-                    HBRUSH hbrFill = CreateSolidBrush(RGB(0, 200, 0));
-                    FillRect(memoryDC, &rc, hbrFill);
-                    DeleteObject(hbrFill);
-
-                    rc = { 3 + side * i,
-                           13 + side * j,
-                           3 + (side + 1) * i,
-                           13 + (side + 1) * j };
-                    HBRUSH hbrRect = CreateSolidBrush(RGB(200, 0, 0));
-                    SelectObject(memoryDC, hbrRect);
-                    HPEN hPen = CreatePen(PS_SOLID, 0, RGB(0, 0, 200));
-                    SelectObject(memoryDC, hPen);
-                    Rectangle(memoryDC, rc.left, rc.top, rc.right, rc.bottom);
-                    DeleteObject(hbrRect);
-                    DeleteObject(hPen);
-
-                    POINT vertices[4];
-                    vertices[0].x = 13 + side * i;
-                    vertices[0].y = 13 + side * j;
-                    vertices[1].x = 13 + (side + 1) * i;
-                    vertices[1].y = vertices[0].y;
-                    vertices[2].x = vertices[1].x;
-                    vertices[2].y = 13 + (side + 1) * j;
-                    vertices[3].x = vertices[0].x;
-                    vertices[3].y = vertices[2].y;
-                    LOGBRUSH logBrush = { BS_NULL, 0, 0 };
-                    HBRUSH hbrPoly = CreateSolidBrush(RGB(200, 100, 200));
-                    hbrPoly = CreateBrushIndirect(&logBrush);
-                    SelectObject(memoryDC, hbrPoly);
-                    HPEN hpPoly = CreatePen(PS_SOLID, 0, RGB(200, 200, 0));
-                    SelectObject(memoryDC, hpPoly);
-                    Polygon(memoryDC, vertices, 4);
-                    DeleteObject(hbrPoly);
-                    DeleteObject(hpPoly);
-                }
-            }
-            // rectangles for example
-        }
-        // This is only for DEBUG
+        memoryDCstorage = CreateCompatibleDC(clntDC);
+        memoryDCdrawing = CreateCompatibleDC(clntDC);
+        memoryDCfinal = CreateCompatibleDC(clntDC);
+        memoryBitMapstorage = CreateCompatibleBitmap(clntDC, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top);
+        memoryBitMapdrawing = CreateCompatibleBitmap(clntDC, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top);
+        memoryBitMapfinal = CreateCompatibleBitmap(clntDC, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top);
+        SelectObject(memoryDCstorage, memoryBitMapstorage);
+        SelectObject(memoryDCdrawing, memoryBitMapdrawing);
+        SelectObject(memoryDCfinal, memoryBitMapfinal);
+        BitBlt(memoryDCstorage, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, clntDC, 0, 0, SRCCOPY);
         DeleteDC(clntDC);
+        RECT rc = { 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top };
+        HBRUSH hbr = CreateSolidBrush(RGB(1, 1, 1));
+        FillRect(memoryDCdrawing, &rc, hbr);
+        DeleteObject(hbr);
+
     }
-    if (memoryDC != NULL)
+    if (memoryDCstorage != NULL)
     {
-        HDC copyDC = CreateCompatibleDC(memoryDC);
-        HBITMAP copyBitMap = CreateCompatibleBitmap(memoryDC, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top);
+        // TODO: consider whether it is necessary to delete the DC-s
+        HDC copyDC = CreateCompatibleDC(memoryDCstorage);
+        HBITMAP copyBitMap = CreateCompatibleBitmap(memoryDCstorage, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top);
         SelectObject(copyDC, copyBitMap);
-        BitBlt(copyDC, 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top, memoryDC, 0, 0, SRCCOPY);
-        DeleteObject(memoryBitMap);
-        DeleteDC(memoryDC);
+        BitBlt(copyDC, 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top, memoryDCstorage, 0, 0, SRCCOPY);
+        DeleteObject(memoryBitMapstorage);
+        DeleteDC(memoryDCstorage);
+        DeleteObject(memoryBitMapdrawing);
+        DeleteDC(memoryDCdrawing);
+        DeleteObject(memoryBitMapfinal);
+        DeleteDC(memoryDCfinal);
 
         GetClientRect(mainWindow, &rcClient);
         if (rcClient.right - rcClient.left > rcMemory.right)
@@ -206,15 +139,27 @@ void ApplicationCore::On_WM_SIZE()
             rcMemory.bottom = rcClient.bottom - rcClient.top;
         }
 
-        memoryDC = CreateCompatibleDC(copyDC);
-        memoryBitMap = CreateCompatibleBitmap(copyDC, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top);
-        SelectObject(memoryDC, memoryBitMap);
+        memoryDCstorage = CreateCompatibleDC(copyDC);
+        memoryBitMapstorage = CreateCompatibleBitmap(copyDC, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top);
+        memoryDCdrawing = CreateCompatibleDC(copyDC);
+        memoryBitMapdrawing = CreateCompatibleBitmap(copyDC, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top);
+        memoryDCfinal = CreateCompatibleDC(copyDC);
+        memoryBitMapfinal = CreateCompatibleBitmap(copyDC, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top);
+        SelectObject(memoryDCstorage, memoryBitMapstorage);
+        SelectObject(memoryDCfinal, memoryBitMapfinal);
+        SelectObject(memoryDCdrawing, memoryBitMapdrawing);
         RECT rc = { 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top };
-        HBRUSH hbr = CreateSolidBrush(RGB(255, 255, 255));
-        FillRect(memoryDC, &rc, hbr);
-        DeleteObject(hbr); BitBlt(memoryDC, 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top, copyDC, 0, 0, SRCCOPY);
+        HBRUSH hbr = CreateSolidBrush(bgColor);
+        FillRect(memoryDCstorage, &rc, hbr);
+        DeleteObject(hbr);
+        rc = { 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top };
+        hbr = CreateSolidBrush(RGB(1, 1, 1));
+        FillRect(memoryDCdrawing, &rc, hbr);
+        DeleteObject(hbr);
+        BitBlt(memoryDCstorage, 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top, copyDC, 0, 0, SRCCOPY);
         DeleteObject(copyBitMap);
         DeleteDC(copyDC);
+        SetActivePen();
     }
 }
 
@@ -251,42 +196,35 @@ void ApplicationCore::CopyToClipboard()
 
 // TODO: put the drawing methods in a new class, which is responsible for drawing
 
-int ApplicationCore::DrawFrameRect()
+void ApplicationCore::DrawRectangle()
 {
     // The following section draws a simple square frame
-    int success = -10;
     if (!rectangleShape.isDrawn)
     {
-        HBRUSH hBrush = CreateSolidBrush(penColor);
-        success = FrameRect(clientDC, &rectangleShape.rect, hBrush);
+        Rectangle(memoryDCdrawing, rectangleShape.rect.left, rectangleShape.rect.top, rectangleShape.rect.right, rectangleShape.rect.bottom);
 
         if (!rectangleShape.isEditing())
         {
             rectangleShape.isDrawn = true;
         }
-        DeleteObject(hBrush);
     }
-    return success;
 }
 
 void ApplicationCore::DrawFreehand()
 {
     if (freehandShape.isSizing)
     {
-        HPEN hPen = CreatePen(PS_SOLID, penWidth, penColor);
-        SelectObject(clientDC, hPen);
         if (freehandShape.previousPoint.x == freehandShape.currentPoint.x &&
             freehandShape.previousPoint.y == freehandShape.currentPoint.y)
         {
-            SetPixelV(clientDC, freehandShape.previousPoint.x, freehandShape.previousPoint.y, RGB(200, 200, 0));
+            SetPixelV(memoryDCdrawing, freehandShape.previousPoint.x, freehandShape.previousPoint.y, RGB(200, 200, 0));
         }
         else
         {
-            MoveToEx(clientDC, freehandShape.previousPoint.x, freehandShape.previousPoint.y, NULL);
-            LineTo(clientDC, freehandShape.currentPoint.x, freehandShape.currentPoint.y);
+            MoveToEx(memoryDCdrawing, freehandShape.previousPoint.x, freehandShape.previousPoint.y, NULL);
+            LineTo(memoryDCdrawing, freehandShape.currentPoint.x, freehandShape.currentPoint.y);
         }
         freehandShape.previousPoint = freehandShape.currentPoint;
-        DeleteObject(hPen);
     }
 }
 
@@ -301,27 +239,23 @@ void ApplicationCore::DrawRoute()
 {
     if (!routeShape.isDrawn)
     {
-        //HPEN hPen = CreatePen(PS_SOLID, penWidth, penColor);
-        HPEN hPen = CreatePen(PS_SOLID, penWidth, RGB(rand() * 255 / RAND_MAX + 1, rand() * 255 / RAND_MAX + 1, rand() * 255 / RAND_MAX + 1));
-        SelectObject(clientDC, hPen);
         if (routeShape.isEditing())
         {
-            MoveToEx(clientDC, routeShape.anchor.x, routeShape.anchor.y, NULL);
-            LineTo(clientDC, routeShape.endPoint.x, routeShape.endPoint.y);
+            MoveToEx(memoryDCdrawing, routeShape.anchor.x, routeShape.anchor.y, NULL);
+            LineTo(memoryDCdrawing, routeShape.endPoint.x, routeShape.endPoint.y);
         }
         else
         {
             POINT startPoint = routeShape.routePoints[0];
             POINT nextPoint;
-            MoveToEx(clientDC, startPoint.x, startPoint.y, NULL);
+            MoveToEx(memoryDCdrawing, startPoint.x, startPoint.y, NULL);
             for (int i = 1; i < routeShape.routePoints.size(); ++i)
             {
                 nextPoint = routeShape.routePoints[i];
-                LineTo(clientDC, nextPoint.x, nextPoint.y);
+                LineTo(memoryDCdrawing, nextPoint.x, nextPoint.y);
             }
             routeShape.isDrawn = true;
         }
-        DeleteObject(hPen);
     }
 
 }
@@ -430,6 +364,19 @@ void ApplicationCore::DrawColorWheel()
 void ApplicationCore::SelectShapeType(ShapeType selection)
 {
     selectedShapeType = selection;
+}
+
+void ApplicationCore::SetActivePen()
+{
+    if (memoryDCdrawing != NULL)
+    {
+        if (activePen != NULL)
+        {
+            DeleteObject(activePen);
+        }
+        activePen = CreatePen(penStyle, penWidth, penColor);
+        SelectObject(memoryDCdrawing, activePen);
+    }
 }
 
 void ApplicationCore::StartDrawingShape()

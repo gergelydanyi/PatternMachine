@@ -100,8 +100,10 @@ HANDLE hLogFile;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
+BOOL                RegisterCanvasClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int, ApplicationCore);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK    ChildWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    PenSettingsDialogProcess(HWND, UINT, WPARAM, LPARAM);
 
@@ -1053,6 +1055,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_PATTERNMACHINE, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
+    if (!RegisterCanvasClass(hInstance))
+    {
+        return FALSE;
+    }
 
     // Perform application initialization:
     if (!InitInstance (hInstance, nCmdShow, appCore))
@@ -1077,7 +1083,29 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return (int) msg.wParam;
 }
 
+BOOL RegisterCanvasClass(HINSTANCE hInstance)
+{
+    WNDCLASSEX wcex;
+    
+    wcex.cbSize = sizeof(WNDCLASSEX);
+    wcex.style = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc = ChildWndProc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = 0;
+    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground = CreateSolidBrush(RGB(255, 150, 150));
+    wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_PATTERNMACHINE);
+    wcex.lpszClassName = L"Canvas";
+    wcex.hIconSm = 0;
 
+    if (!RegisterClassExW(&wcex))
+    {
+        return FALSE;
+    }
+    return TRUE;
+}
 
 //
 //  FUNCTION: MyRegisterClass()
@@ -1098,7 +1126,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PATTERNMACHINE));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     //wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.hbrBackground  = CreateSolidBrush(RGB(255, 150, 150));
+    wcex.hbrBackground  = CreateSolidBrush(RGB(150, 150, 150));
     wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PATTERNMACHINE);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -1327,6 +1355,31 @@ INT_PTR CreateColorPickerDialog(HWND hWndParent, ApplicationCore * pAppCore)
     GlobalFree(hgbl);
 }
 
+HWND CreateCanvas(HWND hWndParent, HINSTANCE hInstance)
+{
+    HWND hCanvas = CreateWindowW(
+        L"Canvas",
+        (LPCTSTR)NULL,
+        WS_CHILD | WS_VISIBLE | WS_BORDER | WS_SIZEBOX,
+        //WS_OVERLAPPEDWINDOW,
+        50, 50, 500, 300,
+        hWndParent,
+        (HMENU)(int)1005,
+        hInstance,
+        0);
+    return hCanvas;
+}
+
+LRESULT CALLBACK ChildWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch (message)
+    {
+    default:
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return 0;
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     ApplicationCore* pAppCore;
@@ -1339,6 +1392,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         HWND hWndComboBox1 = CreateComboBox(hWnd);
         HWND hWndComboBox2 = CreateComboBox(hWnd);
         HWND hWndReBar = CreateReBar(hWnd, NULL, hWndComboBox1, hWndComboBox2);
+        HWND hCanvas = CreateCanvas(hWnd, hInst);
+        if (!hCanvas) PostQuitMessage(0);
+        ShowWindow(hCanvas, SW_SHOW);
+        UpdateWindow(hCanvas);
     }
     else
     {
@@ -1631,6 +1688,14 @@ INT_PTR CALLBACK PenSettingsDialogProcess(HWND hDlg, UINT msg, WPARAM wParam, LP
         {
             SendMessageW(hLst, LB_ADDSTRING, 0, (LPARAM)std::to_wstring(i).c_str());
         }
+        hLst = GetDlgItem(hDlg, IDC_LIST_TYPE);
+        SendMessageW(hLst, LB_ADDSTRING, 0, (LPARAM)L"Solid");
+        SendMessageW(hLst, LB_ADDSTRING, 0, (LPARAM)L"Dash");
+        SendMessageW(hLst, LB_ADDSTRING, 0, (LPARAM)L"Dot");
+        SendMessageW(hLst, LB_ADDSTRING, 0, (LPARAM)L"Dash-dot");
+        SendMessageW(hLst, LB_ADDSTRING, 0, (LPARAM)L"Dash-dot-dot");
+        SendMessageW(hLst, LB_ADDSTRING, 0, (LPARAM)L"Null");
+        SendMessageW(hLst, LB_ADDSTRING, 0, (LPARAM)L"Inside-frame");
         return (INT_PTR)TRUE;
     }
         break;
@@ -1648,6 +1713,7 @@ INT_PTR CALLBACK PenSettingsDialogProcess(HWND hDlg, UINT msg, WPARAM wParam, LP
         case IDCANCEL:
         {
             EndDialog(hDlg, LOWORD(wParam));
+            pAppCore->SetActivePen();
             return (INT_PTR)TRUE;
         }
         break;
@@ -1659,6 +1725,35 @@ INT_PTR CALLBACK PenSettingsDialogProcess(HWND hDlg, UINT msg, WPARAM wParam, LP
             }
             break;
         case IDC_LIST_TYPE:
+            if (HIWORD(wParam) == LBN_SELCHANGE)
+            {
+                HWND hLst = GetDlgItem(hDlg, IDC_LIST_TYPE);
+                int penType = SendMessageW(hLst, LB_GETCURSEL, 0, 0);
+                switch (penType)
+                {
+                case 0:
+                    pAppCore->penStyle = PS_SOLID;
+                    break;
+                case 1:
+                    pAppCore->penStyle = PS_DASH;
+                    break;
+                case 2:
+                    pAppCore->penStyle = PS_DOT;
+                    break;
+                case 3:
+                    pAppCore->penStyle = PS_DASHDOT;
+                    break;
+                case 4:
+                    pAppCore->penStyle = PS_DASHDOTDOT;
+                    break;
+                case 5:
+                    pAppCore->penStyle = PS_NULL;
+                    break;
+                case 6:
+                    pAppCore->penStyle = PS_INSIDEFRAME;
+                    break;
+                }
+            }
             break;
         }
         break;
@@ -1670,8 +1765,12 @@ INT_PTR CALLBACK PenSettingsDialogProcess(HWND hDlg, UINT msg, WPARAM wParam, LP
             HPEN hPen = CreatePen(PS_SOLID, 1, 0);
             HBRUSH hBrush = CreateSolidBrush(pAppCore->penColor);
             HPEN hPenOld = (HPEN)SelectObject(hDc, hPen);
-            FillRect(hDc, &dis->rcItem, hBrush);
+            HBRUSH hBrushOld = (HBRUSH)SelectObject(hDc, hBrush);
+            dis->rcItem.left += 1;
+            dis->rcItem.right -= 1;
+            Rectangle(hDc, dis->rcItem.left, dis->rcItem.top, dis->rcItem.right, dis->rcItem.bottom);
             SelectObject(hDc, hPenOld);
+            SelectObject(hDc, hBrushOld);
             DeleteObject(hBrush);
             DeleteObject(hPen);
         }

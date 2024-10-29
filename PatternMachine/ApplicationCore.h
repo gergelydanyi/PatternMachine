@@ -37,10 +37,17 @@ public:
 	COLORREF penColor;
 	int penWidth;
 	int penStyle;
+	HPEN activePen;
+	void SetActivePen();
+	COLORREF bgColor;
 private:
 	HDC clientDC;
-	HDC memoryDC;
-	HBITMAP memoryBitMap;
+	HDC memoryDCstorage;
+	HDC memoryDCdrawing;
+	HDC memoryDCfinal;
+	HBITMAP memoryBitMapstorage;
+	HBITMAP memoryBitMapdrawing;
+	HBITMAP memoryBitMapfinal;
 	HBITMAP RGBBitMap;
 	POINT memoryBitMapTopLeft = { 0, 0 };
 	bool bgDragging = false;
@@ -51,7 +58,7 @@ private:
 	PatternMachine::Freehand freehandShape;
 	PatternMachine::Route routeShape;
 	ShapeType selectedShapeType;
-	int DrawFrameRect();
+	void DrawRectangle();
 	void DrawFreehand();
 	void DrawRoute();
 	void DrawColorWheel();
