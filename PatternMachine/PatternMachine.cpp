@@ -62,8 +62,9 @@
 #include "framework.h"
 #include "PatternMachine.h"
 #include "ApplicationCore.h"
+#include "Canvas.h"
 #include <time.h>
-#include <string>>
+#include <string>
 
 // Including is necessary for using common control elements, toolbox and imagelist here.
 // (Why is it not included in framework.h? Maybe because it is not part of SDK)
@@ -103,7 +104,7 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                RegisterCanvasClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int, ApplicationCore);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK    ChildWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK    CanvasChildWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    PenSettingsDialogProcess(HWND, UINT, WPARAM, LPARAM);
 
@@ -1089,13 +1090,13 @@ BOOL RegisterCanvasClass(HINSTANCE hInstance)
     
     wcex.cbSize = sizeof(WNDCLASSEX);
     wcex.style = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc = ChildWndProc;
+    wcex.lpfnWndProc = CanvasChildWndProc;
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = 0;
     wcex.hInstance = hInstance;
     wcex.hIcon = 0;
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wcex.hbrBackground = CreateSolidBrush(RGB(255, 150, 150));
+    wcex.hbrBackground = CreateSolidBrush(RGB(220, 220, 220));
     wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_PATTERNMACHINE);
     wcex.lpszClassName = L"Canvas";
     wcex.hIconSm = 0;
@@ -1148,7 +1149,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, ApplicationCore appCore)
 {
    hInst = hInstance; // Store instance handle in our global variable
    HMENU hMenu = LoadMenuW(hInstance, MAKEINTRESOURCEW(IDC_PATTERNMACHINE));
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
       100, 100, 800, 600, nullptr, hMenu, hInstance, &appCore);
    appCore.mainWindow = hWnd;
    appCore.menuBar = hMenu;
@@ -1355,25 +1356,59 @@ INT_PTR CreateColorPickerDialog(HWND hWndParent, ApplicationCore * pAppCore)
     GlobalFree(hgbl);
 }
 
-HWND CreateCanvas(HWND hWndParent, HINSTANCE hInstance)
+Canvas* CreateCanvas(HWND hWndParent, HINSTANCE hInstance, LPVOID lpParam)
 {
+    Canvas* pCanvas = new Canvas();
     HWND hCanvas = CreateWindowW(
         L"Canvas",
         (LPCTSTR)NULL,
-        WS_CHILD | WS_VISIBLE | WS_BORDER | WS_SIZEBOX,
-        //WS_OVERLAPPEDWINDOW,
+        WS_CHILD | WS_VISIBLE,
         50, 50, 500, 300,
         hWndParent,
         (HMENU)(int)1005,
         hInstance,
-        0);
-    return hCanvas;
+        pCanvas);
+    pCanvas->Init(hCanvas);
+    return pCanvas;
 }
 
-LRESULT CALLBACK ChildWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK CanvasChildWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    Canvas* pCanvas;
+    if (message == WM_CREATE)
+    {
+        CREATESTRUCTW* pcs = reinterpret_cast<CREATESTRUCTW*>(lParam);
+        pCanvas = reinterpret_cast<Canvas*>(pcs->lpCreateParams);
+        SetWindowLongPtrW(hWnd, GWLP_USERDATA, (LONG_PTR)pCanvas);
+    }
+    else
+    {
+        LONG_PTR lp = GetWindowLongPtrW(hWnd, GWLP_USERDATA);
+        pCanvas = reinterpret_cast<Canvas*>(lp);
+    }
+
     switch (message)
     {
+    case WM_PAINT:
+    {
+        pCanvas->On_WM_PAINT(wParam, lParam);
+    }
+        break;
+    case WM_LBUTTONDOWN:
+    {
+        pCanvas->On_WM_LBUTTONDOWN(wParam, lParam);
+    }
+        break;
+    case WM_LBUTTONUP:
+    {
+        pCanvas->On_WM_LBUTTONUP(wParam, lParam);
+    }
+        break;
+    case WM_MOUSEMOVE:
+    {
+        pCanvas->On_WM_MOUSEMOVE(wParam, lParam);
+    }
+        break;
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
@@ -1392,10 +1427,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         HWND hWndComboBox1 = CreateComboBox(hWnd);
         HWND hWndComboBox2 = CreateComboBox(hWnd);
         HWND hWndReBar = CreateReBar(hWnd, NULL, hWndComboBox1, hWndComboBox2);
-        HWND hCanvas = CreateCanvas(hWnd, hInst);
-        if (!hCanvas) PostQuitMessage(0);
-        ShowWindow(hCanvas, SW_SHOW);
-        UpdateWindow(hCanvas);
+        pAppCore->pCanvas = CreateCanvas(hWnd, hInst, 0);
+        //if (!Canvas->hWindow) PostQuitMessage(0);
+        ShowWindow(pAppCore->pCanvas->hWindow, SW_SHOW);
+        UpdateWindow(pAppCore->pCanvas->hWindow);
     }
     else
     {
@@ -1425,97 +1460,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_SHAPE_ROUTE:
                 pAppCore->SelectShapeType(ShapeType::RouteShapeType);
                 break;
-            // DONE: replace these many cases with a dialog box, which gets the width of the pen
-            /*case ID_PEN_1:
-                pAppCore->penWidth = 1;
-                break;
-            case ID_PEN_2:
-                pAppCore->penWidth = 2;
-                break;
-            case ID_PEN_3:
-                pAppCore->penWidth = 3;
-                break;
-            case ID_PEN_4:
-                pAppCore->penWidth = 4;
-                break;
-            case ID_PEN_5:
-                pAppCore->penWidth = 5;
-                break;
-            case ID_PEN_6:
-                pAppCore->penWidth = 6;
-                break;
-            case ID_PEN_7:
-                pAppCore->penWidth = 7;
-                break;
-            case ID_PEN_8:
-                pAppCore->penWidth = 8;
-                break;
-            case ID_PEN_9:
-                pAppCore->penWidth = 9;
-                break;
-            case ID_PEN_10:
-                pAppCore->penWidth = 10;
-                break;
-            case ID_PEN_11:
-                pAppCore->penWidth = 11;
-                break;
-            case ID_PEN_12:
-                pAppCore->penWidth = 12;
-                break;
-            case ID_PEN_13:
-                pAppCore->penWidth = 13;
-                break;
-            case ID_PEN_14:
-                pAppCore->penWidth = 14;
-                break;
-            case ID_PEN_15:
-                pAppCore->penWidth = 15;
-                break;
-            case ID_PEN_16:
-                pAppCore->penWidth = 16;
-                break;
-            case ID_PEN_17:
-                pAppCore->penWidth = 17;
-                break;
-            case ID_PEN_18:
-                pAppCore->penWidth = 18;
-                break;
-            case ID_PEN_19:
-                pAppCore->penWidth = 19;
-                break;
-            case ID_PEN_20:
-                pAppCore->penWidth = 20;
-                break;
-            case ID_PEN_21:
-                pAppCore->penWidth = 21;
-                break;
-            case ID_PEN_22:
-                pAppCore->penWidth = 22;
-                break;
-            case ID_PEN_23:
-                pAppCore->penWidth = 23;
-                break;
-            case ID_PEN_24:
-                pAppCore->penWidth = 24;
-                break;
-            case ID_PEN_25:
-                pAppCore->penWidth = 25;
-                break;
-            case ID_PEN_26:
-                pAppCore->penWidth = 26;
-                break;
-            case ID_PEN_27:
-                pAppCore->penWidth = 27;
-                break;
-            case ID_PEN_28:
-                pAppCore->penWidth = 28;
-                break;
-            case ID_PEN_29:
-                pAppCore->penWidth = 29;
-                break;
-            case ID_PEN_30:
-                pAppCore->penWidth = 30;
-                break;*/
             case ID_PEN_SETTINGS:
                 DialogBoxParamW(hInst, MAKEINTRESOURCE(IDD_PEN_SETTINGS), hWnd, PenSettingsDialogProcess, (LPARAM)pAppCore);
                 break;
@@ -1536,9 +1480,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
-    case WM_PAINT:
-        pAppCore->On_WM_PAINT();
-        break;
+    //case WM_PAINT:
+        //pAppCore->On_WM_PAINT();
+        //break;
     case WM_LBUTTONDOWN:
         pAppCore->On_WM_LBUTTONDOWN(lParam);
         break;
@@ -1553,9 +1497,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_MOUSEMOVE:
         pAppCore->On_WM_MOUSEMOVE(lParam);
-        break;
-        // DONE: remove this case, because it is now implemented in a menu, connected with an accelerator
-    case WM_KEYDOWN:
         break;
     case WM_SIZE:
         pAppCore->On_WM_SIZE();

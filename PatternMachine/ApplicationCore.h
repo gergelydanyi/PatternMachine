@@ -4,6 +4,7 @@
 #include "Rectangle.h"
 #include "Freehand.h"
 #include "Route.h"
+#include "Canvas.h"
 
 enum ShapeType
 {
@@ -20,6 +21,7 @@ public:
 	MouseInfo mouse;
 	HWND mainWindow;
 	HMENU menuBar;
+	Canvas* pCanvas;
 	void On_WM_LBUTTONDOWN(LPARAM);
 	void On_WM_LBUTTONUP(LPARAM);
 	void On_WM_RBUTTONDOWN(LPARAM);

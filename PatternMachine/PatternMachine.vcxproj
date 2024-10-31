@@ -129,8 +129,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ApplicationCore.h" />
+    <ClInclude Include="Canvas.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Freehand.h" />
+    <ClInclude Include="Layer.h" />
     <ClInclude Include="MouseInfo.h" />
     <ClInclude Include="PatternMachine.h" />
     <ClInclude Include="Rectangle.h" />
@@ -141,7 +143,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ApplicationCore.cpp" />
+    <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="Freehand.cpp" />
+    <ClCompile Include="Layer.cpp" />
     <ClCompile Include="MouseInfo.cpp" />
     <ClCompile Include="PatternMachine.cpp" />
     <ClCompile Include="Rectangle.cpp" />

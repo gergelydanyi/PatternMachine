@@ -32,6 +32,8 @@ void Rectangle::Sizing(POINT movingCorner, POINT motionVector)
 {
     if (isSizing && !isMoving)
     {
+        // TODO: calculate accurately the dimensions of the rectangle,
+        // it is affected by the thickness of the border (which is based on the penwidth
         RECT rectToBeInvalidated = rect;
         long l = anchor.x;
         long r = movingCorner.x;
