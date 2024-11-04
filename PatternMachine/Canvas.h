@@ -12,9 +12,11 @@ public:
 	HWND hWindow{};
 	HPEN hPen{};
 	HPEN activePen{};
+	HBRUSH activeBrush{};
 	COLORREF penColor;
 	int penWidth;
 	int penStyle;
+	COLORREF brushColor;
 	/*	HBRUSH hBrush{};
 	HDC	memoryDCstorage{};
 	HDC memoryDCdrawing{};
@@ -30,6 +32,7 @@ public:
 	void On_WM_LBUTTONUP(WPARAM, LPARAM);
 	void On_WM_MOUSEMOVE(WPARAM, LPARAM);
 	void SetActivePen();
+	void SetActiveBrush();
 
 private:
 	std::vector<Layer*> layers;

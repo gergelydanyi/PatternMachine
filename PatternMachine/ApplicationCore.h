@@ -39,6 +39,7 @@ public:
 	COLORREF penColor;
 	int penWidth;
 	int penStyle;
+	COLORREF brushColor;
 	HPEN activePen;
 	void SetActivePen();
 	COLORREF bgColor;

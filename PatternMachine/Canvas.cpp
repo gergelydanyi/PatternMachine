@@ -31,21 +31,26 @@ void Canvas::SetupLayers()
 
 void Canvas::SetActivePen()
 {
-        if (activePen != NULL)
-        {
-            DeleteObject(activePen);
-        }
-        //activePen = CreatePen(penStyle, penWidth, penColor);
-        //SelectObject(drawing.hDC, activePen);
-        drawing.SetPen(CreatePen(penStyle, penWidth, penColor));
+    if (activePen != NULL)
+    {
+        DeleteObject(activePen);
+    }
+    drawing.SetPen(CreatePen(penStyle, penWidth, penColor));
+}
+
+void Canvas::SetActiveBrush()
+{
+    if (activeBrush != NULL)
+    {
+        DeleteObject(activeBrush);
+    }
+    drawing.SetBrush(CreateSolidBrush(brushColor));
 }
 
 void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
 {
     mouse.On_WM_LBUTTONDOWN(lParam);
     drawing.Reset();
-//    drawing.SetBrush(CreateSolidBrush(RGB(0, 100, 0)));
-//    drawing.SetPen(CreatePen(PS_SOLID, 1, RGB(200, 0, 100)));
     pRectangle = new PatternMachine::Rectangle();
     pRectangle->mainWindow = hWindow;
     pRectangle->StartSizing(mouse.LD());

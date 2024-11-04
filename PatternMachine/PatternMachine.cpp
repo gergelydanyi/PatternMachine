@@ -107,6 +107,7 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    CanvasChildWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    PenSettingsDialogProcess(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    BrushSettingsDialogProcess(HWND, UINT, WPARAM, LPARAM);
 
 BOOL CALLBACK ColorPickerDialogProcess(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -586,6 +587,7 @@ INT_PTR CreateColorPickerDialog(HWND hWndParent, ApplicationCore * pAppCore)
     GlobalUnlock(hgbl);
     INT_PTR color = DialogBoxIndirectParamW(hInst, (LPDLGTEMPLATE)hgbl, hWndParent, (DLGPROC)ColorPickerDialogProcess, (LPARAM)pAppCore);
     GlobalFree(hgbl);
+    return (INT_PTR)color;
 }
 
 Canvas* CreateCanvas(HWND hWndParent, HINSTANCE hInstance, LPVOID lpParam)
@@ -695,6 +697,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_PEN_SETTINGS:
                 DialogBoxParamW(hInst, MAKEINTRESOURCE(IDD_PEN_SETTINGS), hWnd, PenSettingsDialogProcess, (LPARAM)pAppCore);
                 break;
+            case ID_BRUSH_SETTINGS:
+                DialogBoxParamW(hInst, MAKEINTRESOURCE(IDD_BRUSH_SETTINGS), hWnd, BrushSettingsDialogProcess, (LPARAM)pAppCore);
+                break;
             case ID_COLOR_BORDER:
             {
                 //pAppCore->penColor = 
@@ -797,7 +802,7 @@ BOOL CALLBACK ColorPickerDialogProcess(HWND hwndDlg, UINT message, WPARAM wParam
             int y = HIWORD(lParam);
             HDC clientDC = GetDC(hwndDlg);
             COLORREF color = GetPixel(clientDC, x, y);
-            pAppCore->pCanvas->penColor = color;
+            pAppCore->penColor = color;
             return TRUE;
         }
         break;
@@ -809,7 +814,7 @@ BOOL CALLBACK ColorPickerDialogProcess(HWND hwndDlg, UINT message, WPARAM wParam
             return TRUE;
         case IDOK:
             {
-            COLORREF color = pAppCore->pCanvas->penColor;// RGB(0, 255, 255);
+                COLORREF color = pAppCore->penColor;
                 EndDialog(hwndDlg, INT_PTR(color));
                 return TRUE;
             }
@@ -871,17 +876,17 @@ INT_PTR CALLBACK PenSettingsDialogProcess(HWND hDlg, UINT msg, WPARAM wParam, LP
         SendMessageW(hLst, LB_ADDSTRING, 0, (LPARAM)L"Inside-frame");
         return (INT_PTR)TRUE;
     }
-        break;
+    break;
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
         case IDC_BTN_CHANGE_COLOR:
         {
-            CreateColorPickerDialog(hDlg, pAppCore);
+            pAppCore->pCanvas->penColor = CreateColorPickerDialog(hDlg, pAppCore);
             HWND hCtl = GetDlgItem(hDlg, IDC_CURRENT_COLOR);
             SendMessageW(hCtl, WM_ENABLE, TRUE, 0);
         }
-            break;
+        break;
         case IDOK:
         case IDCANCEL:
         {
@@ -937,6 +942,68 @@ INT_PTR CALLBACK PenSettingsDialogProcess(HWND hDlg, UINT msg, WPARAM wParam, LP
             HDC hDc = dis->hDC;
             HPEN hPen = CreatePen(PS_SOLID, 1, 0);
             HBRUSH hBrush = CreateSolidBrush(pAppCore->penColor);
+            HPEN hPenOld = (HPEN)SelectObject(hDc, hPen);
+            HBRUSH hBrushOld = (HBRUSH)SelectObject(hDc, hBrush);
+            dis->rcItem.left += 1;
+            dis->rcItem.right -= 1;
+            Rectangle(hDc, dis->rcItem.left, dis->rcItem.top, dis->rcItem.right, dis->rcItem.bottom);
+            SelectObject(hDc, hPenOld);
+            SelectObject(hDc, hBrushOld);
+            DeleteObject(hBrush);
+            DeleteObject(hPen);
+        }
+        break;
+    }
+    return (INT_PTR)FALSE;
+}
+
+INT_PTR CALLBACK BrushSettingsDialogProcess(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    ApplicationCore* pAppCore;
+    if (msg == WM_INITDIALOG)
+    {
+        pAppCore = reinterpret_cast<ApplicationCore*>(lParam);
+        SetWindowLongPtrW(hDlg, GWLP_USERDATA, (LONG_PTR)pAppCore);
+    }
+    else
+    {
+        LONG_PTR lp = GetWindowLongPtrW(hDlg, GWLP_USERDATA);
+        pAppCore = reinterpret_cast<ApplicationCore*>(lp);
+    }
+    switch (msg)
+    {
+    case WM_INITDIALOG:
+    {
+        return (INT_PTR)TRUE;
+    }
+    break;
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
+        {
+        case IDC_BUTTON_CHANGE_BR_COLOR:
+        {
+            pAppCore->pCanvas->brushColor = CreateColorPickerDialog(hDlg, pAppCore);
+            HWND hCtl = GetDlgItem(hDlg, IDC_CURRENT_BRUSH_COLOR);
+            SendMessageW(hCtl, WM_ENABLE, TRUE, 0);
+        }
+        break;
+        case IDOK:
+        case IDCANCEL:
+        {
+            EndDialog(hDlg, LOWORD(wParam));
+            pAppCore->pCanvas->SetActiveBrush();
+            return (INT_PTR)TRUE;
+        }
+        break;
+        }
+        break;
+    case WM_DRAWITEM:
+        DRAWITEMSTRUCT* dis = reinterpret_cast<DRAWITEMSTRUCT*>(lParam);
+        if (dis->CtlID == IDC_CURRENT_BRUSH_COLOR)
+        {
+            HDC hDc = dis->hDC;
+            HPEN hPen = CreatePen(PS_SOLID, 1, 0);
+            HBRUSH hBrush = CreateSolidBrush(pAppCore->brushColor);
             HPEN hPenOld = (HPEN)SelectObject(hDc, hPen);
             HBRUSH hBrushOld = (HBRUSH)SelectObject(hDc, hBrush);
             dis->rcItem.left += 1;

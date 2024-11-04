@@ -6,6 +6,7 @@
 ApplicationCore::ApplicationCore()
 {
     penColor = RGB(0, 255, 0);
+    brushColor = RGB(255, 0, 0);
     penWidth = 2;
     penStyle = PS_SOLID;
     activePen = CreatePen(penStyle, penWidth, penColor);
