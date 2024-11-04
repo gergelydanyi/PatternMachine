@@ -24,10 +24,20 @@ void Canvas::SetupLayers()
         layer->rect = clientRect;
         layer->hWindow = hWindow;
         layer->hDC = CreateCompatibleDC(clientDC);
-        layer->hBitmap = CreateCompatibleBitmap(clientDC, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
-        SelectObject(layer->hDC, layer->hBitmap);
+        layer->SetBitmap(CreateCompatibleBitmap(clientDC, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top));
     }
     ReleaseDC(hWindow, clientDC);
+}
+
+void Canvas::SetActivePen()
+{
+        if (activePen != NULL)
+        {
+            DeleteObject(activePen);
+        }
+        //activePen = CreatePen(penStyle, penWidth, penColor);
+        //SelectObject(drawing.hDC, activePen);
+        drawing.SetPen(CreatePen(penStyle, penWidth, penColor));
 }
 
 void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
@@ -63,14 +73,6 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
     GetClientRect(hWindow, &clientRect);
 
     BitBlt(stage.hDC, 0, 0, stage.rect.right - stage.rect.left, stage.rect.bottom - stage.rect.top, storage.hDC, 0, 0, SRCCOPY);
-
-    /*HBRUSH hBrush = CreateSolidBrush(RGB(0, 100, 0));
-    SelectObject(stage.hDC, hBrush);
-    HPEN hPen = CreatePen(PS_SOLID, 1, RGB(200, 0, 100));
-    SelectObject(stage.hDC, hPen);
-    RECT rect = { 10, 10, 70, 50 };
-    Rectangle(stage.hDC, rect.left, rect.top, rect.right, rect.bottom);
-    DeleteObject(hBrush);*/
 
     DrawRectangle();
 

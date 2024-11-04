@@ -11,12 +11,17 @@ public:
 	MouseInfo mouse;
 	HWND hWindow{};
 	HPEN hPen{};
-/*	HBRUSH hBrush{};
+	HPEN activePen{};
+	COLORREF penColor;
+	int penWidth;
+	int penStyle;
+	/*	HBRUSH hBrush{};
 	HDC	memoryDCstorage{};
 	HDC memoryDCdrawing{};
 	HBITMAP memoryBitmapStorage{};
 	HBITMAP memoryBitmapDrawing{};*/
 	PatternMachine::Rectangle* pRectangle;
+
 	Canvas();
 	void Init(HWND);
 	void SetupLayers();
@@ -24,6 +29,7 @@ public:
 	void On_WM_LBUTTONDOWN(WPARAM, LPARAM);
 	void On_WM_LBUTTONUP(WPARAM, LPARAM);
 	void On_WM_MOUSEMOVE(WPARAM, LPARAM);
+	void SetActivePen();
 
 private:
 	std::vector<Layer*> layers;
