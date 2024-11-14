@@ -100,8 +100,7 @@ HANDLE hLogFile;
 
 
 // Forward declarations of functions included in this code module:
-ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                RegisterCanvasClass(HINSTANCE hInstance);
+ATOM                RegisterWindowClasses(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int, ApplicationCore);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK    CanvasChildWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -288,8 +287,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_PATTERNMACHINE, szWindowClass, MAX_LOADSTRING);
-    MyRegisterClass(hInstance);
-    if (!RegisterCanvasClass(hInstance))
+    if (!RegisterWindowClasses(hInstance))
     {
         return FALSE;
     }
@@ -316,12 +314,31 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     CloseLog();
     return (int) msg.wParam;
 }
-
-BOOL RegisterCanvasClass(HINSTANCE hInstance)
+ATOM RegisterWindowClasses(HINSTANCE hInstance)
 {
-    WNDCLASSEX wcex;
-    
+    WNDCLASSEXW wcex{};
+
     wcex.cbSize = sizeof(WNDCLASSEX);
+
+    wcex.style          = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc    = WndProc;
+    wcex.cbClsExtra     = 0;
+    wcex.cbWndExtra     = 0;
+    wcex.hInstance      = hInstance;
+    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PATTERNMACHINE));
+    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
+    wcex.hbrBackground  = CreateSolidBrush(RGB(150, 150, 150));
+    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PATTERNMACHINE);
+    wcex.lpszClassName  = szWindowClass;
+    wcex.hIconSm        = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
+
+    if (!RegisterClassExW(&wcex))
+{
+        return FALSE;
+    }
+    
+    // Canvas window class
+
     wcex.style = CS_HREDRAW | CS_VREDRAW;
     wcex.lpfnWndProc = CanvasChildWndProc;
     wcex.cbClsExtra = 0;
@@ -338,46 +355,10 @@ BOOL RegisterCanvasClass(HINSTANCE hInstance)
     {
         return FALSE;
     }
+
     return TRUE;
 }
 
-//
-//  FUNCTION: MyRegisterClass()
-//
-//  PURPOSE: Registers the window class.
-//
-ATOM MyRegisterClass(HINSTANCE hInstance)
-{
-    WNDCLASSEXW wcex;
-
-    wcex.cbSize = sizeof(WNDCLASSEX);
-
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PATTERNMACHINE));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    //wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.hbrBackground  = CreateSolidBrush(RGB(150, 150, 150));
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PATTERNMACHINE);
-    wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SMALL));
-
-    return RegisterClassExW(&wcex);
-}
-
-//
-//   FUNCTION: InitInstance(HINSTANCE, int)
-//
-//   PURPOSE: Saves instance handle and creates main window
-//
-//   COMMENTS:
-//
-//        In this function, we save the instance handle in a global variable and
-//        create and display the main program window.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, ApplicationCore appCore)
 {
    hInst = hInstance; // Store instance handle in our global variable
@@ -397,17 +378,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, ApplicationCore appCore)
 
    return TRUE;
 }
-
-//
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE: Processes messages for the main window.
-//
-//  WM_COMMAND  - process the application menu
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-//
-//
 
 // TODO: put the below code into a separate unit (ex. utility)
 
