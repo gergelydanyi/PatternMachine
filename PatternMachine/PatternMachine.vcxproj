@@ -76,6 +76,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>GeometricElements;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -90,6 +91,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>GeometricElements;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -104,6 +106,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>GeometricElements;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -119,6 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>GeometricElements;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -131,30 +135,30 @@
     <ClInclude Include="ApplicationCore.h" />
     <ClInclude Include="Canvas.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Freehand.h" />
+    <ClInclude Include="GeometricElements\Freehand.h" />
+    <ClInclude Include="GeometricElements\Line.h" />
+    <ClInclude Include="GeometricElements\Point.h" />
+    <ClInclude Include="GeometricElements\Rectangle.h" />
+    <ClInclude Include="GeometricElements\Route.h" />
+    <ClInclude Include="GeometricElements\Shape.h" />
     <ClInclude Include="Layer.h" />
-    <ClInclude Include="Line.h" />
     <ClInclude Include="MouseInfo.h" />
     <ClInclude Include="PatternMachine.h" />
-    <ClInclude Include="Point.h" />
-    <ClInclude Include="Rectangle.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="Route.h" />
-    <ClInclude Include="Shape.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ApplicationCore.cpp" />
     <ClCompile Include="Canvas.cpp" />
-    <ClCompile Include="Freehand.cpp" />
+    <ClCompile Include="GeometricElements\Freehand.cpp" />
+    <ClCompile Include="GeometricElements\Line.cpp" />
+    <ClCompile Include="GeometricElements\Point.cpp" />
+    <ClCompile Include="GeometricElements\Rectangle.cpp" />
+    <ClCompile Include="GeometricElements\Route.cpp" />
+    <ClCompile Include="GeometricElements\Shape.cpp" />
     <ClCompile Include="Layer.cpp" />
-    <ClCompile Include="Line.cpp" />
     <ClCompile Include="MouseInfo.cpp" />
     <ClCompile Include="PatternMachine.cpp" />
-    <ClCompile Include="Point.cpp" />
-    <ClCompile Include="Rectangle.cpp" />
-    <ClCompile Include="Route.cpp" />
-    <ClCompile Include="Shape.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PatternMachine.rc" />
