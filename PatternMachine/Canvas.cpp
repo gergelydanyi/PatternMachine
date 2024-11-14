@@ -1,4 +1,5 @@
 #include "Canvas.h"
+using namespace PatternMachine;
 
 Canvas::Canvas()
 {
@@ -99,7 +100,7 @@ void Canvas::DrawRectangle()
 {
     if (!pRectangle->isDrawn)
     {
-        Rectangle(drawing.hDC, pRectangle->rect.left, pRectangle->rect.top, pRectangle->rect.right, pRectangle->rect.bottom);
+        ::Rectangle(drawing.hDC, pRectangle->rect.left, pRectangle->rect.top, pRectangle->rect.right, pRectangle->rect.bottom);
         if (!pRectangle->isEditing())
         {
             pRectangle->isDrawn = true;

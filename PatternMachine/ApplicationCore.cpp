@@ -3,6 +3,9 @@
 #include <time.h>
 #include <limits>
 
+namespace PatternMachine
+{
+
 ApplicationCore::ApplicationCore()
 {
     penColor = RGB(0, 255, 0);
@@ -202,7 +205,7 @@ void ApplicationCore::DrawRectangle()
     // The following section draws a simple square frame
     if (!rectangleShape.isDrawn)
     {
-        Rectangle(memoryDCdrawing, rectangleShape.rect.left, rectangleShape.rect.top, rectangleShape.rect.right, rectangleShape.rect.bottom);
+            ::Rectangle(memoryDCdrawing, rectangleShape.rect.left, rectangleShape.rect.top, rectangleShape.rect.right, rectangleShape.rect.bottom);
 
         if (!rectangleShape.isEditing())
         {
@@ -549,4 +552,6 @@ void ApplicationCore::ShowColor()
         InvalidateRect(mainWindow, NULL, FALSE);
     }
     DeleteDC(dc);
+}
+
 }

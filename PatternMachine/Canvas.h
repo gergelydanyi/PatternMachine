@@ -5,6 +5,10 @@
 #include "Shape.h"
 #include "Layer.h"
 
+namespace PatternMachine
+{
+
+
 class Canvas
 {
 public:
@@ -22,7 +26,7 @@ public:
 	HDC memoryDCdrawing{};
 	HBITMAP memoryBitmapStorage{};
 	HBITMAP memoryBitmapDrawing{};*/
-	PatternMachine::Rectangle* pRectangle;
+	Rectangle* pRectangle;
 
 	Canvas();
 	void Init(HWND);
@@ -43,3 +47,4 @@ private:
 	void DrawRectangle();
 };
 
+}

@@ -6,6 +6,9 @@
 #include "Route.h"
 #include "Canvas.h"
 
+namespace PatternMachine
+{
+
 enum ShapeType
 {
 	RectangleShapeType,
@@ -82,3 +85,4 @@ private:
 	void ShowColor();
 };
 
+}

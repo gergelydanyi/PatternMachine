@@ -1,9 +1,7 @@
-// DONE: Move the below list before the winmain function in the application
-
 // TODOS:
 
-// TODO: Adding capability of drawing shapes with the following options
-//      - let the color of the interior be selectable
+// DONE: Adding capability of drawing shapes with the following options
+//      + let the color of the interior be selectable
 //      + can select the color of the frame
 // later options:
 //      - can draw lines and curves
@@ -85,6 +83,8 @@
 #pragma endregion
 
 #define MAX_LOADSTRING 100
+
+using namespace PatternMachine;
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -242,7 +242,7 @@ HWND CreateShapesToolBar(HWND hWndParent)
     SelectObject(memoryDC, hBrush);
     SelectObject(memoryDC, hPen);
     FillRect(memoryDC, &rect, hBrush);
-    Rectangle(memoryDC, 2, 3, 14, 13);
+    ::Rectangle(memoryDC, 2, 3, 14, 13);
     MoveToEx(memoryDC, 16 + 2, 3, NULL);
     LineTo(memoryDC, 16 + 4, 5);
     LineTo(memoryDC, 16 + 8, 7);
@@ -916,7 +916,7 @@ INT_PTR CALLBACK PenSettingsDialogProcess(HWND hDlg, UINT msg, WPARAM wParam, LP
             HBRUSH hBrushOld = (HBRUSH)SelectObject(hDc, hBrush);
             dis->rcItem.left += 1;
             dis->rcItem.right -= 1;
-            Rectangle(hDc, dis->rcItem.left, dis->rcItem.top, dis->rcItem.right, dis->rcItem.bottom);
+            ::Rectangle(hDc, dis->rcItem.left, dis->rcItem.top, dis->rcItem.right, dis->rcItem.bottom);
             SelectObject(hDc, hPenOld);
             SelectObject(hDc, hBrushOld);
             DeleteObject(hBrush);
@@ -978,7 +978,7 @@ INT_PTR CALLBACK BrushSettingsDialogProcess(HWND hDlg, UINT msg, WPARAM wParam, 
             HBRUSH hBrushOld = (HBRUSH)SelectObject(hDc, hBrush);
             dis->rcItem.left += 1;
             dis->rcItem.right -= 1;
-            Rectangle(hDc, dis->rcItem.left, dis->rcItem.top, dis->rcItem.right, dis->rcItem.bottom);
+            ::Rectangle(hDc, dis->rcItem.left, dis->rcItem.top, dis->rcItem.right, dis->rcItem.bottom);
             SelectObject(hDc, hPenOld);
             SelectObject(hDc, hBrushOld);
             DeleteObject(hBrush);
