@@ -40,9 +40,9 @@ public:
 
 private:
 	std::vector<Layer*> layers;
-	Layer stage;
-	Layer storage;
-	Layer drawing;
+	Layer* pStage{};
+	Layer* pStorage{};
+	Layer* pDrawing{};
 
 	void DrawRectangle();
 };

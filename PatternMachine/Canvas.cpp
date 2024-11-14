@@ -1,34 +1,32 @@
 #include "Canvas.h"
+
 using namespace PatternMachine;
 
-Canvas::Canvas()
+Canvas::Canvas(HWND hWndParent, HINSTANCE hInstance)
 {
-    pRectangle = new PatternMachine::Rectangle();
-    layers.push_back(&stage);
-    layers.push_back(&storage);
-    layers.push_back(&drawing);
-}
-
-void Canvas::Init(HWND hWnd)
-{
-    hWindow = hWnd;
+    pRectangle = new Rectangle();
+    pSelectedShape = pRectangle;
+    hWindow = CreateWindowW(
+        L"Canvas",
+        (LPCTSTR)NULL,
+        WS_CHILD | WS_VISIBLE,
+        50, 50, 500, 300,
+        hWndParent,
+        nullptr,
+        hInstance,
+        this);
     SetupLayers();
 }
 
 void Canvas::SetupLayers()
 {
-    HDC clientDC = GetDC(hWindow);
-    RECT clientRect;
-    GetClientRect(hWindow, &clientRect);
-    for (Layer *layer : layers)
-    {
-        layer->rect = clientRect;
-        layer->hWindow = hWindow;
-        layer->hDC = CreateCompatibleDC(clientDC);
-        layer->SetBitmap(CreateCompatibleBitmap(clientDC, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top));
+    pStage = new Layer(hWindow);
+    layers.push_back(pStage);
+    pStorage = new Layer(hWindow);
+    layers.push_back(pStorage);
+    pDrawing = new Layer(hWindow);
+    layers.push_back(pDrawing);
     }
-    ReleaseDC(hWindow, clientDC);
-}
 
 void Canvas::SetActivePen()
 {
@@ -36,7 +34,7 @@ void Canvas::SetActivePen()
     {
         DeleteObject(activePen);
     }
-    drawing.SetPen(CreatePen(penStyle, penWidth, penColor));
+    (*pDrawing).SetPen(CreatePen(penStyle, penWidth, penColor));
 }
 
 void Canvas::SetActiveBrush()
@@ -45,13 +43,13 @@ void Canvas::SetActiveBrush()
     {
         DeleteObject(activeBrush);
     }
-    drawing.SetBrush(CreateSolidBrush(brushColor));
+    (*pDrawing).SetBrush(CreateSolidBrush(brushColor));
 }
 
 void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
 {
     mouse.On_WM_LBUTTONDOWN(lParam);
-    drawing.Reset();
+    
     pRectangle = new PatternMachine::Rectangle();
     pRectangle->mainWindow = hWindow;
     pRectangle->StartSizing(mouse.LD());
@@ -78,19 +76,19 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
     RECT clientRect;
     GetClientRect(hWindow, &clientRect);
 
-    BitBlt(stage.hDC, 0, 0, stage.rect.right - stage.rect.left, stage.rect.bottom - stage.rect.top, storage.hDC, 0, 0, SRCCOPY);
+    BitBlt((*pStage).hDC, 0, 0, (*pStage).rect.right - (*pStage).rect.left, (*pStage).rect.bottom - (*pStage).rect.top, (*pStorage).hDC, 0, 0, SRCCOPY);
 
     DrawRectangle();
 
-    GdiTransparentBlt(stage.hDC, 0, 0, stage.rect.right - stage.rect.left, stage.rect.bottom - stage.rect.top, drawing.hDC, 0, 0, drawing.rect.right - drawing.rect.left, drawing.rect.bottom - drawing.rect.top, RGB(1, 1, 1));
+    GdiTransparentBlt((*pStage).hDC, 0, 0, (*pStage).rect.right - (*pStage).rect.left, (*pStage).rect.bottom - (*pStage).rect.top, (*pDrawing).hDC, 0, 0, (*pDrawing).rect.right - (*pDrawing).rect.left, (*pDrawing).rect.bottom - (*pDrawing).rect.top, RGB(1, 1, 1));
 
-    drawing.Reset();
+    (*pDrawing).Reset();
 
-    BitBlt(hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, stage.hDC, 0, 0, SRCCOPY);
+    BitBlt(hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pStage).hDC, 0, 0, SRCCOPY);
     
     if (!pRectangle->isEditing())
     {
-        BitBlt(storage.hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, hDC, 0, 0, SRCCOPY);
+        BitBlt((*pStorage).hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, hDC, 0, 0, SRCCOPY);
     }
 
     EndPaint(hWindow, &ps);

@@ -11,6 +11,7 @@ public:
 	HBRUSH hBrush{};
 	RECT rect{};
 
+	Layer(HWND);
 	~Layer();
 	void SetBitmap(HBITMAP);
 	void SetPen(HPEN);

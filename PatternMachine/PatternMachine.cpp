@@ -560,22 +560,6 @@ INT_PTR CreateColorPickerDialog(HWND hWndParent, ApplicationCore * pAppCore)
     return (INT_PTR)color;
 }
 
-Canvas* CreateCanvas(HWND hWndParent, HINSTANCE hInstance, LPVOID lpParam)
-{
-    Canvas* pCanvas = new Canvas();
-    HWND hCanvas = CreateWindowW(
-        L"Canvas",
-        (LPCTSTR)NULL,
-        WS_CHILD | WS_VISIBLE,
-        50, 50, 500, 300,
-        hWndParent,
-        (HMENU)(int)1005,
-        hInstance,
-        pCanvas);
-    pCanvas->Init(hCanvas);
-    return pCanvas;
-}
-
 LRESULT CALLBACK CanvasChildWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     Canvas* pCanvas;
@@ -631,10 +615,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         HWND hWndComboBox1 = CreateComboBox(hWnd);
         HWND hWndComboBox2 = CreateComboBox(hWnd);
         HWND hWndReBar = CreateReBar(hWnd, NULL, hWndComboBox1, hWndComboBox2);
-        pAppCore->pCanvas = CreateCanvas(hWnd, hInst, 0);
-        //if (!Canvas->hWindow) PostQuitMessage(0);
-        ShowWindow(pAppCore->pCanvas->hWindow, SW_SHOW);
-        UpdateWindow(pAppCore->pCanvas->hWindow);
+        pAppCore->pCanvas = new Canvas(hWnd, hInst);
+        //ShowWindow(pAppCore->pCanvas->hWindow, SW_SHOW);
+        //UpdateWindow(pAppCore->pCanvas->hWindow);
     }
     else
     {

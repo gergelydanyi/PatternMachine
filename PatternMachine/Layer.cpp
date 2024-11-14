@@ -1,5 +1,17 @@
 #include "Layer.h"
 
+Layer::Layer(HWND clientWindow)
+{
+	HDC clientDC = GetDC(clientWindow);
+	hWindow = clientWindow;
+	GetClientRect(hWindow, &rect);
+	hDC = CreateCompatibleDC(clientDC);
+	SetBitmap(CreateCompatibleBitmap(clientDC, rect.right - rect.left, rect.bottom - rect.top));
+	SetBkMode(hDC, TRANSPARENT);
+	ReleaseDC(clientWindow, clientDC);
+	Reset();
+}
+
 Layer::~Layer()
 {
 	DeleteDC(hDC);
