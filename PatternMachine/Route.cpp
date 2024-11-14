@@ -3,10 +3,6 @@
 namespace PatternMachine {
 
 
-bool Route::isEditing()
-{
-	return isSizing || isMoving;
-}
 void Route::StartSizing(POINT startPoint)
 {
 	isSizing = true;

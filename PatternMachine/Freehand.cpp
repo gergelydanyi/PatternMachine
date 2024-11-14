@@ -2,10 +2,6 @@
 namespace PatternMachine
 {
 
-bool Freehand::isEditing()
-{
-	return isSizing;
-}
 void Freehand::StartSizing(POINT startPoint)
 {
 	isSizing = true;

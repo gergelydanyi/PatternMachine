@@ -9,11 +9,6 @@ namespace PatternMachine
 //    return rc;
 //}
 
-bool Rectangle::isEditing()
-{
-    return (isSizing || isMoving);
-}
-
 void Rectangle::StartSizing(POINT startPoint)
 {
     if (!isMoving)

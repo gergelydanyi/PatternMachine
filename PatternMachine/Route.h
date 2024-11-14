@@ -9,7 +9,6 @@ class Route :
     public Shape
 {
 public:
-    bool isEditing();
     void StartSizing(POINT);
     void Sizing(POINT, POINT);
     void StopSizing();

@@ -9,7 +9,6 @@ class Rectangle :
 {
 public:
     //RECT BoundingRectangle();
-    bool isEditing();
     void StartSizing(POINT);
     void Sizing(POINT, POINT);
     void StopSizing();
