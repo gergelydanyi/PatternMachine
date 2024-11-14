@@ -4,6 +4,8 @@
 #include "Rectangle.h"
 #include "Shape.h"
 #include "Layer.h"
+#include "Line.h"
+#include <vector>
 
 namespace PatternMachine
 {
@@ -21,12 +23,10 @@ public:
 	int penWidth;
 	int penStyle;
 	COLORREF brushColor;
-	/*	HBRUSH hBrush{};
-	HDC	memoryDCstorage{};
-	HDC memoryDCdrawing{};
-	HBITMAP memoryBitmapStorage{};
-	HBITMAP memoryBitmapDrawing{};*/
 	Rectangle* pRectangle;
+	Line* pLine;
+	std::vector<Line*> lines;
+	Shape* pActiveShape;
 
 	Canvas(HWND, HINSTANCE);
 	void Init(HWND);
@@ -37,6 +37,7 @@ public:
 	void On_WM_MOUSEMOVE(WPARAM, LPARAM);
 	void SetActivePen();
 	void SetActiveBrush();
+	Shape* NewShape(ShapeType);
 
 private:
 	std::vector<Layer*> layers;
@@ -45,6 +46,7 @@ private:
 	Layer* pDrawing{};
 
 	void DrawRectangle();
+	void DrawLine();
 };
 
 }

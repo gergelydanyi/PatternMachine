@@ -9,14 +9,6 @@
 namespace PatternMachine
 {
 
-enum ShapeType
-{
-	RectangleShapeType,
-	LineShapeType,
-	FreehandShapeType,
-	RouteShapeType
-};
-
 class ApplicationCore
 {
 public:

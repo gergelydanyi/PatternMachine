@@ -19,6 +19,7 @@ namespace PatternMachine
 
 	void Line::StartSizing(POINT p)
 	{
+		p1.MoveTo(p.x, p.y);
 		isSizing = true;
 		isDrawn = false;
 	}
