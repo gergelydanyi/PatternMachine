@@ -27,8 +27,7 @@ namespace PatternMachine
 	{
 		if (isSizing)
 		{
-			this->p2.x = p1.x;
-			this->p2.y = p1.y;
+			this->p2.MoveTo(p1.x, p1.y);
 			InvalidateRect(mainWindow, NULL, FALSE);
 		}
 	}
