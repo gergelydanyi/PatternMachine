@@ -5,7 +5,6 @@ using namespace PatternMachine;
 Canvas::Canvas(HWND hWndParent, HINSTANCE hInstance)
 {
     pRectangle = new Rectangle();
-    pSelectedShape = pRectangle;
     hWindow = CreateWindowW(
         L"Canvas",
         (LPCTSTR)NULL,
@@ -98,7 +97,7 @@ void Canvas::DrawRectangle()
 {
     if (!pRectangle->isDrawn)
     {
-        ::Rectangle(drawing.hDC, pRectangle->rect.left, pRectangle->rect.top, pRectangle->rect.right, pRectangle->rect.bottom);
+        ::Rectangle((*pDrawing).hDC, pRectangle->rect.left, pRectangle->rect.top, pRectangle->rect.right, pRectangle->rect.bottom);
         if (!pRectangle->isEditing())
         {
             pRectangle->isDrawn = true;

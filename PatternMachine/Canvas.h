@@ -28,7 +28,7 @@ public:
 	HBITMAP memoryBitmapDrawing{};*/
 	Rectangle* pRectangle;
 
-	Canvas();
+	Canvas(HWND, HINSTANCE);
 	void Init(HWND);
 	void SetupLayers();
 	void On_WM_PAINT(WPARAM, LPARAM);
