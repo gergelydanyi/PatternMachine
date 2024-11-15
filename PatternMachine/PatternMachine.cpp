@@ -212,7 +212,7 @@ HWND CreateSimpleToolBar(HWND hWndParent)
 HWND CreateShapesToolBar(HWND hWndParent)
 {
     const int ImageListID = 0;
-    const int numButtons = 3;
+    const int numButtons = 4;
     const int bitmapSize = 16;
 
     const DWORD buttonStyles = BTNS_AUTOSIZE;
@@ -236,17 +236,19 @@ HWND CreateShapesToolBar(HWND hWndParent)
     HDC memoryDC = CreateCompatibleDC(clientDC);
     HBITMAP hBitmap = CreateCompatibleBitmap(clientDC, bitmapSize * numButtons, bitmapSize);
     HGDIOBJ hOrigBitmap = SelectObject(memoryDC, hBitmap);
-    RECT rect = { 0, 0, 48, 16 };
+    RECT rect = { 0, 0, 64, 16 };
     HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 0) | 0x00000001);
     HPEN hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
     SelectObject(memoryDC, hBrush);
     SelectObject(memoryDC, hPen);
     FillRect(memoryDC, &rect, hBrush);
     ::Rectangle(memoryDC, 2, 3, 14, 13);
-    MoveToEx(memoryDC, 16 + 2, 3, NULL);
-    LineTo(memoryDC, 16 + 4, 5);
-    LineTo(memoryDC, 16 + 8, 7);
-    Ellipse(memoryDC, 32 + 2, 4, 32 + 14, 12);
+    MoveToEx(memoryDC, 16 + 2, 13, NULL);
+    LineTo(memoryDC, 16 + 11, 4);
+    MoveToEx(memoryDC, 32 + 2, 3, NULL);
+    LineTo(memoryDC, 32 + 4, 5);
+    LineTo(memoryDC, 32 + 8, 7);
+    Ellipse(memoryDC, 48 + 2, 4, 48 + 14, 12);
     SelectObject(memoryDC, hOrigBitmap);
     if (ImageList_AddMasked(g_hImageList, hBitmap, (COLORREF)0X00000001) == -1)
     {
@@ -257,8 +259,9 @@ HWND CreateShapesToolBar(HWND hWndParent)
     TBBUTTON tbButtons[numButtons] =
     {
         { MAKELONG(0, ImageListID), ID_SHAPE_RECTANGLE,  TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
-        { MAKELONG(1, ImageListID), ID_SHAPE_FREEHAND, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
-        { MAKELONG(2, ImageListID), ID_SHAPE_ROUTE, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0}
+        { MAKELONG(1, ImageListID), ID_SHAPE_LINE, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
+        { MAKELONG(2, ImageListID), ID_SHAPE_FREEHAND, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
+        { MAKELONG(3, ImageListID), ID_SHAPE_ROUTE, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0}
     };
     SendMessage(hWndToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
     SendMessage(hWndToolbar, TB_ADDBUTTONS, (WPARAM)numButtons, (LPARAM)&tbButtons);

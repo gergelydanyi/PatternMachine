@@ -368,6 +368,7 @@ void ApplicationCore::DrawColorWheel()
 void ApplicationCore::SelectShapeType(ShapeType selection)
 {
     selectedShapeType = selection;
+    pCanvas->SetActiveShapeType(selection);
 }
 
 void ApplicationCore::SetActivePen()

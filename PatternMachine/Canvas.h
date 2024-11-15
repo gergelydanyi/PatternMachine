@@ -37,6 +37,7 @@ public:
 	void On_WM_MOUSEMOVE(WPARAM, LPARAM);
 	void SetActivePen();
 	void SetActiveBrush();
+	void SetActiveShapeType(ShapeType);
 	Shape* NewShape(ShapeType);
 
 private:
