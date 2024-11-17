@@ -1,4 +1,5 @@
 #include "Point.h"
+#include "math.h"
 
 Point::Point()
 {
@@ -27,4 +28,9 @@ void Point::MoveTo(long x, long y)
 {
 	this->x = x;
 	this->y = y;
+}
+
+long Point::operator-(Point p)
+{
+	return sqrt(pow(x - p.x, 2) + pow(y - p.y, 2));
 }

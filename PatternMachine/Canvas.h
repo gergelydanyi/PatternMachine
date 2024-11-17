@@ -48,6 +48,7 @@ private:
 
 	void DrawRectangle();
 	void DrawLine();
+	void DrawHitRegion(HDC);
 };
 
 }

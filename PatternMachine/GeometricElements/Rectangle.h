@@ -12,7 +12,7 @@ public:
     void StartSizing(POINT);
     void Sizing(POINT, POINT);
     void StopSizing();
-    HWND mainWindow;
+    void SetHitRegion() override;
 };
 
 }

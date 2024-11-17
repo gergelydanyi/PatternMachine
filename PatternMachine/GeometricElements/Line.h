@@ -13,13 +13,14 @@ namespace PatternMachine
 		Point* points[2];
 		Point p1;
 		Point p2;
-		HWND mainWindow;
 
 		Line(Point&, Point&);
 		~Line();
 		void StartSizing(POINT);
 		void Sizing(POINT, POINT);
 		void StopSizing();
+		void SetHitRegion() override;
+
 	};
 
 }

@@ -18,7 +18,7 @@ Canvas::Canvas(HWND hWndParent, HINSTANCE hInstance)
     pLine = (Line*)NewShape(LineShapeType);
     // TODO: this should be moved to the Shape constructor
     pLine->mainWindow = hWindow;
-    pActiveShape = pRectangle;
+    pActiveShape = pLine;
     SetupLayers();
 }
 
@@ -108,6 +108,7 @@ void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
     mouse.On_WM_MOUSEMOVE(lParam);
     //pLine->Sizing(mouse.CurrentPosition(), mouse.MotionVector());
     pActiveShape->Sizing(mouse.CurrentPosition(), mouse.MotionVector());
+    pActiveShape->HitTest(mouse.CurrentPosition(), mouse.PreviousPosition());
     /*pRectangle->Sizing(mouse.CurrentPosition(), mouse.MotionVector());*/
 }
 
@@ -134,6 +135,9 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
     {
         BitBlt((*pStorage).hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, hDC, 0, 0, SRCCOPY);
     }
+    DrawHitRegion(hDC);
+    GdiTransparentBlt(hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pDrawing).hDC, 0, 0, (*pDrawing).rect.right - (*pDrawing).rect.left, (*pDrawing).rect.bottom - (*pDrawing).rect.top, RGB(1, 1, 1));
+    (*pDrawing).Reset();
 
     EndPaint(hWindow, &ps);
 }
@@ -156,10 +160,17 @@ void Canvas::DrawLine()
     {
         MoveToEx(pDrawing->hDC, pLine->p1.x, pLine->p1.y, NULL);
         LineTo(pDrawing->hDC, pLine->p2.x, pLine->p2.y);
-
         if (!pLine->isEditing())
         {
             pLine->isDrawn = true;
         }
+    }
+}
+
+void Canvas::DrawHitRegion(HDC hDC)
+{
+    if (!pActiveShape->isEditing() && pActiveShape->isDrawn && PtInRegion(pActiveShape->hitRegion, mouse.X(), mouse.Y()) > 0)
+    {
+        FrameRgn(pDrawing->hDC, pActiveShape->hitRegion, pDrawing->hBrush, 1, 1);
     }
 }

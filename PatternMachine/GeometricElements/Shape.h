@@ -26,6 +26,10 @@ namespace PatternMachine
 		bool isSizing = false;
 		bool isMoving = false;
 		bool isDrawn = true;
+		HWND mainWindow;
+		HRGN hitRegion;
+		virtual void HitTest(POINT, POINT);
+		virtual void SetHitRegion();
 	private:
 		std::vector<POINT> vertices;
 		POINT topmostVertex;
