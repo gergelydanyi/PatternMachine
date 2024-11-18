@@ -60,6 +60,12 @@
     <ClInclude Include="GeometricElements\Route.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Pen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Brush.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PatternMachine.cpp">
@@ -78,9 +84,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeometricElements\Shape.cpp">
-      <Filter>Base\GeometricElements</Filter>
-    </ClCompile>
-    <ClCompile Include="GeometricElements\Shape.cpp">
       <Filter>Source Files\Geometric Elements</Filter>
     </ClCompile>
     <ClCompile Include="GeometricElements\Route.cpp">
@@ -97,6 +100,15 @@
     </ClCompile>
     <ClCompile Include="GeometricElements\Freehand.cpp">
       <Filter>Source Files\Geometric Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="GeometricElements\Shape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Pen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Brush.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

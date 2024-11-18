@@ -16,7 +16,7 @@ class Canvas
 public:
 	MouseInfo mouse;
 	HWND hWindow{};
-	HPEN hPen{};
+
 	HPEN activePen{};
 	HBRUSH activeBrush{};
 	COLORREF penColor;

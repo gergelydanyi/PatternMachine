@@ -1,5 +1,7 @@
 #pragma once
 #include "framework.h"
+#include "Pen.h"
+#include "Brush.h"
 #include <vector>
 
 namespace PatternMachine
@@ -28,6 +30,9 @@ namespace PatternMachine
 		bool isDrawn = true;
 		HWND mainWindow;
 		HRGN hitRegion;
+		Pen pen;
+		Brush brush;
+
 		virtual void HitTest(POINT, POINT);
 		virtual void SetHitRegion();
 	private:
