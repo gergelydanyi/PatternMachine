@@ -13,12 +13,12 @@ Canvas::Canvas(HWND hWndParent, HINSTANCE hInstance)
         nullptr,
         hInstance,
         this);
-    pRectangle = new Rectangle();
-    pRectangle->mainWindow = hWindow;
-    pLine = (Line*)NewShape(LineShapeType);
-    // TODO: this should be moved to the Shape constructor
-    pLine->mainWindow = hWindow;
-    pActiveShape = pLine;
+    //pRectangle = (Rectangle*)NewShape(RectangleShapeType);
+    //pLine = (Line*)NewShape(LineShapeType);
+    //pActiveShape = pLine;
+    //shapes.push_back(pRectangle);
+    //shapes.push_back(pLine);
+    //NewShape(selectedShapeType);
     SetupLayers();
 }
 
@@ -50,7 +50,7 @@ void Canvas::SetActiveBrush()
     (*pDrawing).SetBrush(CreateSolidBrush(brushColor));
 }
 
-void Canvas::SetActiveShapeType(ShapeType shapeType)
+/*void Canvas::SetActiveShapeType(ShapeType shapeType)
 {
     switch (shapeType)
     {
@@ -61,55 +61,84 @@ void Canvas::SetActiveShapeType(ShapeType shapeType)
         pActiveShape = pLine;
         break;
     }
+}*/
+
+Shape& Canvas::ActiveShape()
+{
+    switch (selectedShapeType)
+    {
+    case RectangleShapeType:
+        pActiveShape = pRectangle;
+        break;
+    case LineShapeType:
+        pActiveShape = pLine;
+        break;
+    }
+    return *pActiveShape;
 }
 
-Shape* Canvas::NewShape(ShapeType t)
+void Canvas::NewShape()
 {
     Shape* pShape = nullptr;
-    switch (t)
+    switch (selectedShapeType)
     {
     case LineShapeType:
     {
         Point* p1 = new Point();
         Point* p2 = new Point();
-        pShape = new Line(*p1, *p2);
+        pLine = new Line(*p1, *p2);
+        pShape = pLine;
+        pShape->mainWindow = hWindow;
     }
         break;
     case RectangleShapeType:
     {
-        pShape = new Rectangle();
+        pRectangle = new Rectangle();
+        pShape = pRectangle;
+        pShape->mainWindow = hWindow;
     }
     }
-    return pShape;
+    shapes.push_back(pShape);
 }
 
 void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
 {
     mouse.On_WM_LBUTTONDOWN(lParam);
-    //pLine->StartSizing(mouse.LD());
-    pActiveShape->StartSizing(mouse.LD());
-    /*pRectangle = new PatternMachine::Rectangle();
-    pRectangle->mainWindow = hWindow;
-    pRectangle->StartSizing(mouse.LD());*/
+    if (!editingMode)
+    {
+        editingMode = true;
+        NewShape();
+        ActiveShape().StartSizing(mouse.LD());
+    }
+    else
+    {
+    }
 }
 
 void Canvas::On_WM_LBUTTONUP(WPARAM wParam, LPARAM lParam)
 {
     mouse.On_WM_LBUTTONUP(lParam);
-    //pLine->StopSizing();
-    pActiveShape->StopSizing();
-    /*pRectangle->StopSizing();*/
-    // TODO: this should be placed elsewhere, because we use the object even after releasing left button
-    //delete pRectangle;
+    if (editingMode)
+    {
+        editingMode = false;
+        ActiveShape().StopSizing();
+    }
 }
 
 void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
 {
     mouse.On_WM_MOUSEMOVE(lParam);
-    //pLine->Sizing(mouse.CurrentPosition(), mouse.MotionVector());
-    pActiveShape->Sizing(mouse.CurrentPosition(), mouse.MotionVector());
-    pActiveShape->HitTest(mouse.CurrentPosition(), mouse.PreviousPosition());
-    /*pRectangle->Sizing(mouse.CurrentPosition(), mouse.MotionVector());*/
+    if (editingMode)
+    {
+        ActiveShape().Sizing(mouse.CurrentPosition(), mouse.MotionVector());
+    }
+    else
+    {
+        for (Shape* pShape : shapes)
+        {
+            pShape->HitTest(mouse.CurrentPosition(), mouse.PreviousPosition());
+        }
+    }
 }
 
 void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
@@ -121,8 +150,9 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
 
     BitBlt((*pStage).hDC, 0, 0, (*pStage).rect.right - (*pStage).rect.left, (*pStage).rect.bottom - (*pStage).rect.top, (*pStorage).hDC, 0, 0, SRCCOPY);
 
-    DrawRectangle();
-    DrawLine();
+    /*DrawRectangle();*/
+    /*DrawLine();*/
+    DrawShape();
 
     GdiTransparentBlt((*pStage).hDC, 0, 0, (*pStage).rect.right - (*pStage).rect.left, (*pStage).rect.bottom - (*pStage).rect.top, (*pDrawing).hDC, 0, 0, (*pDrawing).rect.right - (*pDrawing).rect.left, (*pDrawing).rect.bottom - (*pDrawing).rect.top, RGB(1, 1, 1));
 
@@ -130,21 +160,24 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
 
     BitBlt(hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pStage).hDC, 0, 0, SRCCOPY);
     
-    //if (!pRectangle->isEditing())
-    if (!pActiveShape->isEditing())
+    if (pActiveShape != 0 && !ActiveShape().isEditing())
+    //if (!editingMode)
     {
         BitBlt((*pStorage).hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, hDC, 0, 0, SRCCOPY);
     }
-    DrawHitRegion(hDC);
-    GdiTransparentBlt(hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pDrawing).hDC, 0, 0, (*pDrawing).rect.right - (*pDrawing).rect.left, (*pDrawing).rect.bottom - (*pDrawing).rect.top, RGB(1, 1, 1));
-    (*pDrawing).Reset();
+    if (!editingMode)
+    {
+        DrawHitRegion(hDC);
+        GdiTransparentBlt(hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pDrawing).hDC, 0, 0, (*pDrawing).rect.right - (*pDrawing).rect.left, (*pDrawing).rect.bottom - (*pDrawing).rect.top, RGB(1, 1, 1));
+        (*pDrawing).Reset();
+    }
 
     EndPaint(hWindow, &ps);
 }
 
-void Canvas::DrawRectangle()
+/*void Canvas::DrawRectangle()
 {
-    if (!pRectangle->isDrawn)
+    if (editingMode && !pRectangle->isDrawn)
     {
         ::Rectangle((*pDrawing).hDC, pRectangle->rect.left, pRectangle->rect.top, pRectangle->rect.right, pRectangle->rect.bottom);
         if (!pRectangle->isEditing())
@@ -152,11 +185,11 @@ void Canvas::DrawRectangle()
             pRectangle->isDrawn = true;
         }
     }
-}
+}*/
 
-void Canvas::DrawLine()
+/*void Canvas::DrawLine()
 {
-    if (!pLine->isDrawn)
+    if (editingMode && !pLine->isDrawn)
     {
         MoveToEx(pDrawing->hDC, pLine->p1.x, pLine->p1.y, NULL);
         LineTo(pDrawing->hDC, pLine->p2.x, pLine->p2.y);
@@ -165,12 +198,40 @@ void Canvas::DrawLine()
             pLine->isDrawn = true;
         }
     }
+}*/
+
+void Canvas::DrawShape()
+{
+    if (pActiveShape != 0 && !ActiveShape().isDrawn)
+    {
+        switch (selectedShapeType)
+        {
+        case LineShapeType:
+        {
+            MoveToEx(pDrawing->hDC, pLine->p1.x, pLine->p1.y, NULL);
+            LineTo(pDrawing->hDC, pLine->p2.x, pLine->p2.y);
+        }
+        break;
+        case RectangleShapeType:
+        {
+            ::Rectangle((*pDrawing).hDC, pRectangle->rect.left, pRectangle->rect.top, pRectangle->rect.right, pRectangle->rect.bottom);
+        }
+        break;
+        }
+        if (!ActiveShape().isEditing())
+        {
+            ActiveShape().isDrawn = true;
+        }
+    }
 }
 
 void Canvas::DrawHitRegion(HDC hDC)
 {
-    if (!pActiveShape->isEditing() && pActiveShape->isDrawn && PtInRegion(pActiveShape->hitRegion, mouse.X(), mouse.Y()) > 0)
+    for (Shape* pShape : shapes)
     {
-        FrameRgn(pDrawing->hDC, pActiveShape->hitRegion, pDrawing->hBrush, 1, 1);
+        if (!pShape->isEditing() && pShape->isDrawn && PtInRegion(pShape->hitRegion, mouse.X(), mouse.Y()) > 0)
+        {
+            FrameRgn(pDrawing->hDC, pShape->hitRegion, pDrawing->hBrush, 1, 1);
+        }
     }
 }

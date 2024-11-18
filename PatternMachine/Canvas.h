@@ -25,11 +25,12 @@ public:
 	COLORREF brushColor;
 	Rectangle* pRectangle;
 	Line* pLine;
-	std::vector<Line*> lines;
+	std::vector<Shape*> shapes;
 	Shape* pActiveShape;
+	ShapeType selectedShapeType = LineShapeType;
+	bool editingMode = false;
 
 	Canvas(HWND, HINSTANCE);
-	void Init(HWND);
 	void SetupLayers();
 	void On_WM_PAINT(WPARAM, LPARAM);
 	void On_WM_LBUTTONDOWN(WPARAM, LPARAM);
@@ -37,8 +38,9 @@ public:
 	void On_WM_MOUSEMOVE(WPARAM, LPARAM);
 	void SetActivePen();
 	void SetActiveBrush();
-	void SetActiveShapeType(ShapeType);
-	Shape* NewShape(ShapeType);
+	/*void SetActiveShapeType(ShapeType);*/
+	Shape& ActiveShape();
+	void NewShape();
 
 private:
 	std::vector<Layer*> layers;
@@ -46,8 +48,9 @@ private:
 	Layer* pStorage{};
 	Layer* pDrawing{};
 
-	void DrawRectangle();
-	void DrawLine();
+	/*void DrawRectangle();*/
+	/*void DrawLine();*/
+	void DrawShape();
 	void DrawHitRegion(HDC);
 };
 
