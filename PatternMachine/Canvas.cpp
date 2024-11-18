@@ -13,12 +13,6 @@ Canvas::Canvas(HWND hWndParent, HINSTANCE hInstance)
         nullptr,
         hInstance,
         this);
-    //pRectangle = (Rectangle*)NewShape(RectangleShapeType);
-    //pLine = (Line*)NewShape(LineShapeType);
-    //pActiveShape = pLine;
-    //shapes.push_back(pRectangle);
-    //shapes.push_back(pLine);
-    //NewShape(selectedShapeType);
     SetupLayers();
 }
 
@@ -49,19 +43,6 @@ void Canvas::SetActiveBrush()
     }
     (*pDrawing).SetBrush(CreateSolidBrush(brushColor));
 }
-
-/*void Canvas::SetActiveShapeType(ShapeType shapeType)
-{
-    switch (shapeType)
-    {
-    case RectangleShapeType:
-        pActiveShape = pRectangle;
-        break;
-    case LineShapeType:
-        pActiveShape = pLine;
-        break;
-    }
-}*/
 
 Shape& Canvas::ActiveShape()
 {
@@ -150,8 +131,6 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
 
     BitBlt((*pStage).hDC, 0, 0, (*pStage).rect.right - (*pStage).rect.left, (*pStage).rect.bottom - (*pStage).rect.top, (*pStorage).hDC, 0, 0, SRCCOPY);
 
-    /*DrawRectangle();*/
-    /*DrawLine();*/
     DrawShape();
 
     GdiTransparentBlt((*pStage).hDC, 0, 0, (*pStage).rect.right - (*pStage).rect.left, (*pStage).rect.bottom - (*pStage).rect.top, (*pDrawing).hDC, 0, 0, (*pDrawing).rect.right - (*pDrawing).rect.left, (*pDrawing).rect.bottom - (*pDrawing).rect.top, RGB(1, 1, 1));
@@ -161,7 +140,6 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
     BitBlt(hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pStage).hDC, 0, 0, SRCCOPY);
     
     if (pActiveShape != 0 && !ActiveShape().isEditing())
-    //if (!editingMode)
     {
         BitBlt((*pStorage).hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, hDC, 0, 0, SRCCOPY);
     }
@@ -174,31 +152,6 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
 
     EndPaint(hWindow, &ps);
 }
-
-/*void Canvas::DrawRectangle()
-{
-    if (editingMode && !pRectangle->isDrawn)
-    {
-        ::Rectangle((*pDrawing).hDC, pRectangle->rect.left, pRectangle->rect.top, pRectangle->rect.right, pRectangle->rect.bottom);
-        if (!pRectangle->isEditing())
-        {
-            pRectangle->isDrawn = true;
-        }
-    }
-}*/
-
-/*void Canvas::DrawLine()
-{
-    if (editingMode && !pLine->isDrawn)
-    {
-        MoveToEx(pDrawing->hDC, pLine->p1.x, pLine->p1.y, NULL);
-        LineTo(pDrawing->hDC, pLine->p2.x, pLine->p2.y);
-        if (!pLine->isEditing())
-        {
-            pLine->isDrawn = true;
-        }
-    }
-}*/
 
 void Canvas::DrawShape()
 {

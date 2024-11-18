@@ -38,7 +38,6 @@ public:
 	void On_WM_MOUSEMOVE(WPARAM, LPARAM);
 	void SetActivePen();
 	void SetActiveBrush();
-	/*void SetActiveShapeType(ShapeType);*/
 	Shape& ActiveShape();
 	void NewShape();
 
@@ -48,8 +47,6 @@ private:
 	Layer* pStorage{};
 	Layer* pDrawing{};
 
-	/*void DrawRectangle();*/
-	/*void DrawLine();*/
 	void DrawShape();
 	void DrawHitRegion(HDC);
 };
