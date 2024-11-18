@@ -10,45 +10,44 @@
 namespace PatternMachine
 {
 
+	class Canvas
+	{
+	public:
+		MouseInfo mouse;
+		HWND hWindow{};
 
-class Canvas
-{
-public:
-	MouseInfo mouse;
-	HWND hWindow{};
+		HPEN activePen{};
+		HBRUSH activeBrush{};
 
-	HPEN activePen{};
-	HBRUSH activeBrush{};
-	COLORREF penColor;
-	int penWidth;
-	int penStyle;
-	COLORREF brushColor;
-	Rectangle* pRectangle;
-	Line* pLine;
-	std::vector<Shape*> shapes;
-	Shape* pActiveShape;
-	ShapeType selectedShapeType = LineShapeType;
-	bool editingMode = false;
+		COLORREF penColor;
+		int penWidth;
+		int penStyle;
+		COLORREF brushColor;
 
-	Canvas(HWND, HINSTANCE);
-	void SetupLayers();
-	void On_WM_PAINT(WPARAM, LPARAM);
-	void On_WM_LBUTTONDOWN(WPARAM, LPARAM);
-	void On_WM_LBUTTONUP(WPARAM, LPARAM);
-	void On_WM_MOUSEMOVE(WPARAM, LPARAM);
-	void SetActivePen();
-	void SetActiveBrush();
-	Shape& ActiveShape();
-	void NewShape();
+		std::vector<Shape*> shapes;
+		Shape* pActiveShape;
+		ShapeType selectedShapeType = LineShapeType;
+		bool editingMode = false;
 
-private:
-	std::vector<Layer*> layers;
-	Layer* pStage{};
-	Layer* pStorage{};
-	Layer* pDrawing{};
+		Canvas(HWND, HINSTANCE);
+		void SetupLayers();
+		void On_WM_PAINT(WPARAM, LPARAM);
+		void On_WM_LBUTTONDOWN(WPARAM, LPARAM);
+		void On_WM_LBUTTONUP(WPARAM, LPARAM);
+		void On_WM_MOUSEMOVE(WPARAM, LPARAM);
+		void SetActivePen();
+		void SetActiveBrush();
+		Shape& ActiveShape();
+		void NewShape();
 
-	void DrawShape();
-	void DrawHitRegion(HDC);
-};
+	private:
+		std::vector<Layer*> layers;
+		Layer* pStage{};
+		Layer* pStorage{};
+		Layer* pDrawing{};
+
+		void DrawShape();
+		void DrawHitRegion();
+	};
 
 }

@@ -46,40 +46,28 @@ void Canvas::SetActiveBrush()
 
 Shape& Canvas::ActiveShape()
 {
-    switch (selectedShapeType)
-    {
-    case RectangleShapeType:
-        pActiveShape = pRectangle;
-        break;
-    case LineShapeType:
-        pActiveShape = pLine;
-        break;
-    }
     return *pActiveShape;
 }
 
 void Canvas::NewShape()
 {
-    Shape* pShape = nullptr;
     switch (selectedShapeType)
     {
     case LineShapeType:
     {
         Point* p1 = new Point();
         Point* p2 = new Point();
-        pLine = new Line(*p1, *p2);
-        pShape = pLine;
-        pShape->mainWindow = hWindow;
+        pActiveShape = new Line(*p1, *p2);
+        pActiveShape->mainWindow = hWindow;
     }
         break;
     case RectangleShapeType:
     {
-        pRectangle = new Rectangle();
-        pShape = pRectangle;
-        pShape->mainWindow = hWindow;
+        pActiveShape = new Rectangle();
+        pActiveShape->mainWindow = hWindow;
     }
     }
-    shapes.push_back(pShape);
+    shapes.push_back(pActiveShape);
 }
 
 void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
@@ -145,7 +133,7 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
     }
     if (!editingMode)
     {
-        DrawHitRegion(hDC);
+        DrawHitRegion();
         GdiTransparentBlt(hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pDrawing).hDC, 0, 0, (*pDrawing).rect.right - (*pDrawing).rect.left, (*pDrawing).rect.bottom - (*pDrawing).rect.top, RGB(1, 1, 1));
         (*pDrawing).Reset();
     }
@@ -161,13 +149,15 @@ void Canvas::DrawShape()
         {
         case LineShapeType:
         {
-            MoveToEx(pDrawing->hDC, pLine->p1.x, pLine->p1.y, NULL);
-            LineTo(pDrawing->hDC, pLine->p2.x, pLine->p2.y);
+            Line& line = (Line&)*pActiveShape;
+            MoveToEx(pDrawing->hDC, line.p1.x, line.p1.y, NULL);
+            LineTo(pDrawing->hDC, line.p2.x, line.p2.y);
         }
         break;
         case RectangleShapeType:
         {
-            ::Rectangle((*pDrawing).hDC, pRectangle->rect.left, pRectangle->rect.top, pRectangle->rect.right, pRectangle->rect.bottom);
+            Rectangle& rectangle = (Rectangle&)*pActiveShape;
+            ::Rectangle((*pDrawing).hDC, rectangle.rect.left, rectangle.rect.top, rectangle.rect.right, rectangle.rect.bottom);
         }
         break;
         }
@@ -178,7 +168,7 @@ void Canvas::DrawShape()
     }
 }
 
-void Canvas::DrawHitRegion(HDC hDC)
+void Canvas::DrawHitRegion()
 {
     for (Shape* pShape : shapes)
     {
