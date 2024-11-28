@@ -16,9 +16,10 @@ namespace PatternMachine
 
 		Line(Point&, Point&);
 		~Line();
-		void StartSizing(POINT);
-		void Sizing(POINT, POINT);
-		void StopSizing();
+		void StartSizing(POINT) override;
+		void Sizing(POINT, POINT) override;
+		void StopSizing() override;
+		void MoveBy(POINT) override;
 		void SetHitRegion() override;
 
 	};

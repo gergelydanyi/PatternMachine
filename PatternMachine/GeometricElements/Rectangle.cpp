@@ -9,6 +9,11 @@ namespace PatternMachine
     //    return rc;
     //}
 
+    Rectangle::Rectangle()
+    {
+        type = RectangleShapeType;
+    }
+
     void Rectangle::StartSizing(POINT startPoint)
     {
         if (!isMoving)
@@ -55,6 +60,16 @@ namespace PatternMachine
         SetHitRegion();
         isSizing = false;
         InvalidateRect(mainWindow, &rect, FALSE);
+    }
+
+    void Rectangle::MoveBy(POINT p1)
+    {
+        rect.left += p1.x;
+        rect.top += p1.y;
+        rect.right += p1.x;
+        rect.bottom += p1.y;
+        SetHitRegion();
+        InvalidateRect(mainWindow, NULL, FALSE);
     }
 
     void Rectangle::SetHitRegion()

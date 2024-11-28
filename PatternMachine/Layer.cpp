@@ -23,19 +23,19 @@ Layer::~Layer()
 void Layer::SetBitmap(HBITMAP h)
 {
 	hBitmap = h;
-	SelectObject(hDC, hBitmap);
+	DeleteObject(SelectObject(hDC, hBitmap));
 }
 
 void Layer::SetPen(HPEN h)
 {
 	hPen = h;
-	SelectObject(hDC, hPen);
+	DeleteObject(SelectObject(hDC, hPen));
 }
 
 void Layer::SetBrush(HBRUSH h)
 {
 	hBrush = h;
-	SelectObject(hDC, hBrush);
+	DeleteObject(SelectObject(hDC, hBrush));
 }
 
 void Layer::Reset()

@@ -25,9 +25,12 @@ namespace PatternMachine
 		COLORREF brushColor;
 
 		std::vector<Shape*> shapes;
+		std::vector<Shape*> selectedShapes;
 		Shape* pActiveShape;
 		ShapeType selectedShapeType = LineShapeType;
 		bool editingMode = false;
+		bool selectionMode = true;
+		bool movingMode = false;
 
 		Canvas(HWND, HINSTANCE);
 		void SetupLayers();
@@ -39,6 +42,7 @@ namespace PatternMachine
 		void SetActiveBrush();
 		Shape& ActiveShape();
 		void NewShape();
+		void SelectHighlightedShapes();
 
 	private:
 		std::vector<Layer*> layers;
@@ -47,6 +51,7 @@ namespace PatternMachine
 		Layer* pDrawing{};
 
 		void DrawShape();
+		void DrawSelectedShapes();
 		void DrawHitRegion();
 	};
 

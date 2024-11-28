@@ -9,10 +9,12 @@ class Rectangle :
 {
 public:
     //RECT BoundingRectangle();
-    void StartSizing(POINT);
-    void Sizing(POINT, POINT);
-    void StopSizing();
+    Rectangle();
+    void StartSizing(POINT) override;
+    void Sizing(POINT, POINT) override;
+    void StopSizing() override;
     void SetHitRegion() override;
+    void MoveBy(POINT) override;
 };
 
 }

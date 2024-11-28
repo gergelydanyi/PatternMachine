@@ -5,6 +5,7 @@ namespace PatternMachine
 
 	Line::Line(Point& p1, Point& p2)
 	{
+		type = LineShapeType;
 		this->p1 = p1;
 		this->p2 = p2;
 		points[0] = &p1;
@@ -37,6 +38,18 @@ namespace PatternMachine
 	{
 		SetHitRegion();
 		isSizing = false;
+		InvalidateRect(mainWindow, NULL, FALSE);
+	}
+
+	void Line::MoveBy(POINT p)
+	{
+		for (Point* point : points)
+		{
+			point->MoveBy(p.x, p.y);
+		}
+		p1.MoveBy(p.x, p.y);
+		p2.MoveBy(p.x, p.y);
+		SetHitRegion();
 		InvalidateRect(mainWindow, NULL, FALSE);
 	}
 
