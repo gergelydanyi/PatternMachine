@@ -67,23 +67,57 @@ void Canvas::NewShape()
     }
     pActiveShape->SetLayer(new Layer(hWindow));
     layers.push_back(pActiveShape->layer);
-    pActiveShape->layer->Reset();
-    pActiveShape->layer->SetPen(CreatePen(penStyle, penWidth, penColor));
-    pActiveShape->layer->SetBrush(CreateSolidBrush(brushColor));
+    //pActiveShape->layer->Reset();
+    //pActiveShape->layer->SetPen(CreatePen(penStyle, penWidth, penColor));
+    //pActiveShape->layer->SetBrush(CreateSolidBrush(brushColor));
     pActiveShape->mainWindow = hWindow;
     shapes.push_back(pActiveShape);
 }
 
 void Canvas::SelectHighlightedShapes()
 {
+    for (Shape* pShape : selectedShapes)
+    {
+        pShape->isSelected = false;
+    }
     selectedShapes.clear();
     for (Shape* pShape : shapes)
     {
         if (PtInRegion(pShape->hitRegion, mouse.X(), mouse.Y()) > 0)
         {
+            pShape->isSelected = true;
             selectedShapes.push_back(pShape);
         }
     }
+}
+
+
+void Canvas::DeleteSelection()
+{
+    if (pActiveShape != 0 && pActiveShape->isSelected)
+    {
+        pActiveShape = 0;
+    }
+    for (int i = layers.size() - 1; i >= 0; --i)
+    {
+        if (shapes[i]->isSelected)
+        {
+            layers.erase(layers.begin() + i);
+        }
+    }
+    for (int i = shapes.size() - 1; i >= 0; --i)
+    {
+        if (shapes[i]->isSelected)
+        {
+            shapes.erase(shapes.begin() + i);
+        }
+    }
+    for (Shape* pShape : selectedShapes)
+    {
+        delete pShape;
+    }
+    selectedShapes.clear();
+    InvalidateRect(hWindow, NULL, FALSE);
 }
 
 void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
@@ -262,5 +296,9 @@ void Canvas::DrawHitRegion()
         {
             FrameRgn(pDrawing->hDC, pShape->hitRegion, pDrawing->hBrush, 1, 1);
         }
+    }
+    for (Shape* pShape : selectedShapes)
+    {
+        FrameRgn(pDrawing->hDC, pShape->hitRegion, pDrawing->hBrush, 1, 1);
     }
 }

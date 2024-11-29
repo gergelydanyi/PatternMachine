@@ -43,9 +43,10 @@ namespace PatternMachine
 		Shape& ActiveShape();
 		void NewShape();
 		void SelectHighlightedShapes();
+		void DeleteSelection();
+		std::vector<Layer*> layers;
 
 	private:
-		std::vector<Layer*> layers;
 		Layer* pStage{};
 		Layer* pStorage{};
 		Layer* pDrawing{};

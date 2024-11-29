@@ -4,6 +4,7 @@ namespace PatternMachine
 {
 
 	// TODO: add inner color
+	Shape::~Shape() { delete layer; }
 	bool Shape::isEditing()	{ return isSizing || isMoving; }
 	void Shape::StartSizing(POINT) {}
 	void Shape::Sizing(POINT, POINT) {}

@@ -19,6 +19,7 @@ namespace PatternMachine
 	class Shape
 	{
 	public:
+		~Shape();
 		POINT anchor;
 		RECT rect = { 0, 0, 100, 100 };
 		virtual RECT BoundingRectangle();
@@ -31,6 +32,7 @@ namespace PatternMachine
 		bool isSizing = false;
 		bool isMoving = false;
 		bool isDrawn = true;
+		bool isSelected = false;
 		ShapeType type;
 		HWND mainWindow;
 		HRGN hitRegion;

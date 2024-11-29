@@ -29,6 +29,7 @@ public:
 	void On_WM_INITDIALOG();
 	SHORT keyState;
 	void CopyToClipboard();
+	void DeleteSelection();
 	void SelectShapeType(ShapeType);
 	HDC RGBDC;
 	COLORREF penColor;

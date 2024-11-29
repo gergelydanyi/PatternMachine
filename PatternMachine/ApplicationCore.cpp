@@ -198,6 +198,11 @@ void ApplicationCore::CopyToClipboard()
     CloseClipboard();
 }
 
+void ApplicationCore::DeleteSelection()
+{
+    pCanvas->DeleteSelection();
+}
+
 // TODO: put the drawing methods in a new class, which is responsible for drawing
 
 void ApplicationCore::DrawRectangle()
