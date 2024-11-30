@@ -74,6 +74,11 @@ void Canvas::NewShape()
     shapes.push_back(pActiveShape);
 }
 
+void Canvas::ChangeBehaviour(CanvasBehaviour behaviour)
+{
+    this->behaviour = behaviour;
+}
+
 void Canvas::SelectHighlightedShapes()
 {
     for (Shape* pShape : selectedShapes)
@@ -123,7 +128,19 @@ void Canvas::DeleteSelection()
 void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
 {
     mouse.On_WM_LBUTTONDOWN(lParam);
-    if (selectionMode)
+    switch (behaviour)
+    {
+    case PointingSelection:
+        SelectHighlightedShapes();
+        break;
+    case Drawing:
+        {
+            NewShape();
+            ActiveShape().StartSizing(mouse.LD());
+        }
+        break;
+    }
+/*    if (selectionMode)
     {
         SelectHighlightedShapes();
         if (selectedShapes.size() > 0)
@@ -146,13 +163,21 @@ void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
     }
     else if (movingMode)
     {
-    }
+    }*/
 }
 
 void Canvas::On_WM_LBUTTONUP(WPARAM wParam, LPARAM lParam)
 {
     mouse.On_WM_LBUTTONUP(lParam);
-    if (editingMode)
+    switch (behaviour)
+    {
+    case PointingSelection:
+        break;
+    case Drawing:
+        ActiveShape().StopSizing();
+        break;
+    }
+/*    if (editingMode)
     {
         editingMode = false;
         selectionMode = true;
@@ -165,13 +190,40 @@ void Canvas::On_WM_LBUTTONUP(WPARAM wParam, LPARAM lParam)
         selectionMode = true;
         editingMode = false;
         movingMode = false;
-    }
+    }*/
 }
 
 void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
 {
     mouse.On_WM_MOUSEMOVE(lParam);
-    if (editingMode)
+    switch (behaviour)
+    {
+    case PointingSelection:
+    {
+        if (mouse.LeftButtonPressed())
+        {
+            for (Shape* pShape : selectedShapes)
+            {
+                pShape->MoveBy(mouse.MotionVector());
+            }
+        }
+        else
+        {
+            for (Shape* pShape : shapes)
+            {
+                pShape->HitTest(mouse.CurrentPosition(), mouse.PreviousPosition());
+            }
+        }
+    }
+        break;
+    case Drawing:
+        if (mouse.LeftButtonPressed())
+        {
+            ActiveShape().Sizing(mouse.CurrentPosition(), mouse.MotionVector());
+        }
+        break;
+    }
+/*/    if (editingMode)
     {
         ActiveShape().Sizing(mouse.CurrentPosition(), mouse.MotionVector());
     }
@@ -188,7 +240,7 @@ void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
         {
             pShape->HitTest(mouse.CurrentPosition(), mouse.PreviousPosition());
         }
-    }
+    }*/
 }
 
 void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)

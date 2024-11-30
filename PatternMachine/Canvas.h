@@ -10,6 +10,12 @@
 namespace PatternMachine
 {
 
+	enum CanvasBehaviour {
+		PointingSelection,
+		FramingSelection,
+		Drawing
+	};
+
 	class Canvas
 	{
 	public:
@@ -31,6 +37,7 @@ namespace PatternMachine
 		bool editingMode = false;
 		bool selectionMode = true;
 		bool movingMode = false;
+		CanvasBehaviour behaviour = Drawing;
 
 		Canvas(HWND, HINSTANCE);
 		void SetupLayers();
@@ -42,6 +49,7 @@ namespace PatternMachine
 		void SetActiveBrush();
 		Shape& ActiveShape();
 		void NewShape();
+		void ChangeBehaviour(CanvasBehaviour);
 		void SelectHighlightedShapes();
 		void DeleteSelection();
 		std::vector<Layer*> layers;

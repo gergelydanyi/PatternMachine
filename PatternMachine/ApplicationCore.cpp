@@ -203,6 +203,11 @@ void ApplicationCore::DeleteSelection()
     pCanvas->DeleteSelection();
 }
 
+void ApplicationCore::ChangeCanvasBehaviour(CanvasBehaviour behaviour)
+{
+    pCanvas->ChangeBehaviour(behaviour);
+}
+
 // TODO: put the drawing methods in a new class, which is responsible for drawing
 
 void ApplicationCore::DrawRectangle()

@@ -30,6 +30,7 @@ public:
 	SHORT keyState;
 	void CopyToClipboard();
 	void DeleteSelection();
+	void ChangeCanvasBehaviour(CanvasBehaviour);
 	void SelectShapeType(ShapeType);
 	HDC RGBDC;
 	COLORREF penColor;

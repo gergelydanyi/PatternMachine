@@ -638,6 +638,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_EDIT_DELETE:
                 pAppCore->DeleteSelection();
                 break;
+            case ID_SELECTIONMODE_SIMPLE:
+                pAppCore->ChangeCanvasBehaviour(PointingSelection);
+                break;
+            case ID_EDIT_DRAWINGMODE:
+                pAppCore->ChangeCanvasBehaviour(Drawing);
+                break;
             case ID_SHAPE_RECTANGLE:
                 pAppCore->SelectShapeType(ShapeType::RectangleShapeType);
                 break;

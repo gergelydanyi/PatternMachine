@@ -97,6 +97,13 @@
 #define ID_FILE_NEW                     32842
 #define ID_PEN_SETTINGS                 32845
 #define ID_BRUSH_SETTINGS               32846
+#define ID_EDIT_SELECTION               32849
+#define ID_SELECTIONMODE_SIMPLE         32850
+#define ID_SELECTIONMODE_ROUNDING       32851
+#define ID_SELECTIONMODE_LINE           32852
+#define ID_ROUNDING_RECTANGLE           32853
+#define ID_ROUNDING_FREEHAND            32854
+#define ID_EDIT_DRAWINGMODE             32855
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -105,7 +112,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        132
-#define _APS_NEXT_COMMAND_VALUE         32849
+#define _APS_NEXT_COMMAND_VALUE         32856
 #define _APS_NEXT_CONTROL_VALUE         1011
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
