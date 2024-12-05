@@ -50,7 +50,7 @@ namespace PatternMachine
 		Shape& ActiveShape();
 		void NewShape();
 		void ChangeBehaviour(CanvasBehaviour);
-		void SelectHighlightedShapes();
+		void SelectHighlightedShapes(bool CtrlPressed);
 		void DeleteSelection();
 		std::vector<Layer*> layers;
 

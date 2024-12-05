@@ -19,12 +19,9 @@ Canvas::Canvas(HWND hWndParent, HINSTANCE hInstance)
 void Canvas::SetupLayers()
 {
     pStage = new Layer(hWindow);
-    //layers.push_back(pStage);
     pStorage = new Layer(hWindow);
-    //layers.push_back(pStorage);
     pDrawing = new Layer(hWindow);
-    //layers.push_back(pDrawing);
-    }
+}
 
 void Canvas::SetActivePen()
 {
@@ -79,23 +76,52 @@ void Canvas::ChangeBehaviour(CanvasBehaviour behaviour)
     this->behaviour = behaviour;
 }
 
-void Canvas::SelectHighlightedShapes()
+void Canvas::SelectHighlightedShapes(bool CtrlPressed)
 {
-    for (Shape* pShape : selectedShapes)
+    if (!CtrlPressed)
     {
-        pShape->isSelected = false;
+        for (Shape* pShape : selectedShapes)
+        {
+            pShape->isSelected = false;
+        }
+        selectedShapes.clear();
     }
-    selectedShapes.clear();
-    for (Shape* pShape : shapes)
+    Shape* pShape = nullptr;
+    int j = shapes.size() - 1;
+    if (j < 0)
     {
-        if (PtInRegion(pShape->hitRegion, mouse.X(), mouse.Y()) > 0)
+        return;
+    }
+    while (j >= 0)
+    {
+        if (PtInRegion(shapes[j]->hitRegion, mouse.X(), mouse.Y()) > 0)
+        {
+            pShape = shapes[j];
+            j = 0;
+        }
+        --j;
+    }
+    if (pShape != 0)
+    {
+        if (!pShape->isSelected)
         {
             pShape->isSelected = true;
             selectedShapes.push_back(pShape);
         }
+        else
+        {
+            pShape->isSelected = false;
+            for (int i = selectedShapes.size() - 1; i >= 0; --i)
+            {
+                if (selectedShapes[i] == pShape)
+                {
+                    selectedShapes.erase(selectedShapes.begin() + i);
+                }
+            }
+        }
     }
+    InvalidateRect(hWindow, NULL, FALSE);
 }
-
 
 void Canvas::DeleteSelection()
 {
@@ -131,7 +157,10 @@ void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
     switch (behaviour)
     {
     case PointingSelection:
-        SelectHighlightedShapes();
+    {
+        bool CtrlPressed = wParam & MK_CONTROL;
+        SelectHighlightedShapes(CtrlPressed);
+    }
         break;
     case Drawing:
         {
@@ -140,30 +169,6 @@ void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
         }
         break;
     }
-/*    if (selectionMode)
-    {
-        SelectHighlightedShapes();
-        if (selectedShapes.size() > 0)
-        {
-            selectionMode = false;
-            editingMode = false;
-            movingMode = true;
-        }
-        else
-        {
-            selectionMode = false;
-            editingMode = true;
-            movingMode = false;
-        }
-    }
-    if (editingMode)
-    {
-        NewShape();
-        ActiveShape().StartSizing(mouse.LD());
-    }
-    else if (movingMode)
-    {
-    }*/
 }
 
 void Canvas::On_WM_LBUTTONUP(WPARAM wParam, LPARAM lParam)
@@ -177,20 +182,6 @@ void Canvas::On_WM_LBUTTONUP(WPARAM wParam, LPARAM lParam)
         ActiveShape().StopSizing();
         break;
     }
-/*    if (editingMode)
-    {
-        editingMode = false;
-        selectionMode = true;
-        ActiveShape().StopSizing();
-    }
-    else if (selectionMode)
-    { }
-    else if (movingMode)
-    {
-        selectionMode = true;
-        editingMode = false;
-        movingMode = false;
-    }*/
 }
 
 void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
@@ -223,24 +214,6 @@ void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
         }
         break;
     }
-/*/    if (editingMode)
-    {
-        ActiveShape().Sizing(mouse.CurrentPosition(), mouse.MotionVector());
-    }
-    else if (movingMode)
-    {
-        for (Shape* pShape : selectedShapes)
-        {
-            pShape->MoveBy(mouse.MotionVector());
-        }
-    }
-    else if (selectionMode)
-    {
-        for (Shape* pShape : shapes)
-        {
-            pShape->HitTest(mouse.CurrentPosition(), mouse.PreviousPosition());
-        }
-    }*/
 }
 
 void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
@@ -250,7 +223,6 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
     RECT clientRect;
     GetClientRect(hWindow, &clientRect);
 
-    //BitBlt((*pStage).hDC, 0, 0, (*pStage).rect.right - (*pStage).rect.left, (*pStage).rect.bottom - (*pStage).rect.top, (*pStorage).hDC, 0, 0, SRCCOPY);
     pStage->Reset();
     DrawShape();
     DrawSelectedShapes();
@@ -268,7 +240,7 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
     {
         BitBlt((*pStorage).hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pStage).hDC, 0, 0, SRCCOPY);
     }
-    if (selectionMode)
+    if (behaviour == PointingSelection)
     {
         DrawHitRegion();
         GdiTransparentBlt((*pStage).hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pDrawing).hDC, 0, 0, (*pDrawing).rect.right - (*pDrawing).rect.left, (*pDrawing).rect.bottom - (*pDrawing).rect.top, RGB(1, 1, 1));
