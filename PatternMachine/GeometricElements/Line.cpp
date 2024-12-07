@@ -2,14 +2,18 @@
 
 namespace PatternMachine
 {
+	Line::Line(HWND hwnd) : Line(new Layer(hwnd)) {}
 
-	Line::Line(Point& p1, Point& p2)
+	Line::Line(Layer* pLayer) : Line(*new Point(), *new Point(), pLayer) {}
+
+	Line::Line(Point& p1, Point& p2, Layer* pLayer)
 	{
 		type = LineShapeType;
 		this->p1 = p1;
 		this->p2 = p2;
 		points[0] = &p1;
 		points[1] = &p2;
+		SetLayer(pLayer);
 	}
 
 	Line::~Line()
@@ -51,6 +55,12 @@ namespace PatternMachine
 		p2.MoveBy(p.x, p.y);
 		SetHitRegion();
 		InvalidateRect(mainWindow, NULL, FALSE);
+	}
+
+	void Line::Draw()
+	{
+		MoveToEx(layer->hDC, p1.x, p1.y, NULL);
+		LineTo(layer->hDC, p2.x, p2.y);
 	}
 
 	void Line::SetHitRegion()

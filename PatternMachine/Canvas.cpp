@@ -52,17 +52,16 @@ void Canvas::NewShape()
     {
     case LineShapeType:
     {
-        Point* p1 = new Point();
-        Point* p2 = new Point();
-        pActiveShape = new Line(*p1, *p2);
+        //pActiveShape = new Line(new Layer(hWindow));
+        pActiveShape = new Line(hWindow);
     }
         break;
     case RectangleShapeType:
     {
-        pActiveShape = new Rectangle();
+        pActiveShape = new Rectangle(hWindow);
     }
     }
-    pActiveShape->SetLayer(new Layer(hWindow));
+    //pActiveShape->SetLayer(new Layer(hWindow));
     layers.push_back(pActiveShape->layer);
     //pActiveShape->layer->Reset();
     //pActiveShape->layer->SetPen(CreatePen(penStyle, penWidth, penColor));
@@ -257,7 +256,7 @@ void Canvas::DrawShape()
     if (pActiveShape != 0 && !ActiveShape().isDrawn)
     {
         pActiveShape->layer->Reset();
-        switch (selectedShapeType)
+        /*switch (selectedShapeType)
         {
         case LineShapeType:
         {
@@ -275,7 +274,9 @@ void Canvas::DrawShape()
             ::Rectangle(pActiveShape->layer->hDC, rectangle.rect.left, rectangle.rect.top, rectangle.rect.right, rectangle.rect.bottom);
         }
         break;
-        }
+        }*/
+        // Instead of the above:
+        pActiveShape->Draw();
         if (!ActiveShape().isEditing())
         {
             ActiveShape().isDrawn = true;

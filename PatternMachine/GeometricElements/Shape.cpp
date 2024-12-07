@@ -4,12 +4,15 @@ namespace PatternMachine
 {
 
 	// TODO: add inner color
+	Shape::Shape() {}
+	Shape::Shape(Layer* l) { SetLayer(l); }
 	Shape::~Shape() { delete layer; }
 	bool Shape::isEditing()	{ return isSizing || isMoving; }
 	void Shape::StartSizing(POINT) {}
 	void Shape::Sizing(POINT, POINT) {}
 	void Shape::StopSizing() { isSizing = false; }
 	void Shape::MoveBy(POINT) {}
+	void Shape::Draw() {}
 	void Shape::SetLayer(Layer* layer) { this->layer = layer; }
 	void Shape::HitTest(POINT pCurrent, POINT pPrevious)
 	{

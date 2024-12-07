@@ -9,9 +9,14 @@ namespace PatternMachine
     //    return rc;
     //}
 
-    Rectangle::Rectangle()
+    Rectangle::Rectangle() {}
+
+    Rectangle::Rectangle(HWND hwnd) : Rectangle(new Layer(hwnd)) {}
+
+    Rectangle::Rectangle(Layer* pLayer)
     {
         type = RectangleShapeType;
+        SetLayer(pLayer);
     }
 
     void Rectangle::StartSizing(POINT startPoint)
@@ -77,6 +82,11 @@ namespace PatternMachine
         long hitAreaWidth = 5;
         DeleteObject(hitRegion);
         hitRegion = CreateRoundRectRgn(rect.left - hitAreaWidth, rect.top - hitAreaWidth, rect.right + hitAreaWidth + 1, rect.bottom + hitAreaWidth + 1, hitAreaWidth, hitAreaWidth);
+    }
+
+    void Rectangle::Draw()
+    {
+        ::Rectangle(layer->hDC, rect.left, rect.top, rect.right, rect.bottom);
     }
 
 }

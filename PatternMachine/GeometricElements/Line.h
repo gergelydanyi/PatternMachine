@@ -14,14 +14,16 @@ namespace PatternMachine
 		Point p1;
 		Point p2;
 
-		Line(Point&, Point&);
+		Line(HWND);
+		Line(Layer*);
+		Line(Point&, Point&, Layer*);
 		~Line();
 		void StartSizing(POINT) override;
 		void Sizing(POINT, POINT) override;
 		void StopSizing() override;
 		void MoveBy(POINT) override;
 		void SetHitRegion() override;
-
+		void Draw() override;
 	};
 
 }
