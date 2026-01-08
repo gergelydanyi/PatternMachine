@@ -19,41 +19,26 @@ ApplicationCore::ApplicationCore()
 void ApplicationCore::On_WM_LBUTTONDOWN(LPARAM lParam)
 {
     mouse.On_WM_LBUTTONDOWN(lParam);
-    StartDrawingShape();
 }
 
 void ApplicationCore::On_WM_LBUTTONUP(LPARAM lParam)
 {
     mouse.On_WM_LBUTTONUP(lParam);
-    StopDrawingShape();
 }
 
 void ApplicationCore::On_WM_RBUTTONDOWN(LPARAM lParam)
 {
     mouse.On_WM_RBUTTONDOWN(lParam);
-    if (rectangleShape.isSizing)
-    {
-        StartMovingRectangle();
-    }
-    if (!rectangleShape.isSizing)
-    {
-        StartDraggingBackground();
-    }
 }
 
 void ApplicationCore::On_WM_RBUTTONUP(LPARAM lParam)
 {
     mouse.On_WM_RBUTTONUP(lParam);
-    StopMovingRectangle();
-    StopDraggingBackground();
 }
 
 void ApplicationCore::On_WM_MOUSEMOVE(LPARAM lParam)
 {
     mouse.On_WM_MOUSEMOVE(lParam);
-    DrawingShape();
-    MoveRectangle();
-    DraggingBackground();
     ShowColor();
 }
 
@@ -69,7 +54,6 @@ void ApplicationCore::On_WM_PAINT()
     // Formerly we painted directly to the screen after copying the previous bitmap stored in memory,
     // now we paint into the memory (the Draw methods use memoryDCfinal), and after this the final picture is copied to the screen
     BitBlt(memoryDCfinal, 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top, memoryDCstorage, 0, 0, SRCCOPY);
-    DrawRectangle();
     DrawFreehand();
     DrawRoute();
     GdiTransparentBlt(memoryDCfinal, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, memoryDCdrawing, 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, RGB(1, 1, 1));
@@ -81,12 +65,6 @@ void ApplicationCore::On_WM_PAINT()
     // ---------------------------------------------
     BitBlt(clientDC, 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, memoryDCfinal, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, SRCCOPY);
 
-    if (!(
-        rectangleShape.isEditing() || routeShape.isEditing()
-        ))
-    {
-        BitBlt(memoryDCstorage, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, clientDC, 0, 0, SRCCOPY);
-    }
     EndPaint(mainWindow, &ps);
     DeleteObject(hRgn);
 }
@@ -208,21 +186,7 @@ void ApplicationCore::ChangeCanvasBehaviour(CanvasBehaviour behaviour)
     pCanvas->ChangeBehaviour(behaviour);
 }
 
-// TODO: put the drawing methods in a new class, which is responsible for drawing
-
-void ApplicationCore::DrawRectangle()
-{
-    // The following section draws a simple square frame
-    if (!rectangleShape.isDrawn)
-    {
-            ::Rectangle(memoryDCdrawing, rectangleShape.rect.left, rectangleShape.rect.top, rectangleShape.rect.right, rectangleShape.rect.bottom);
-
-        if (!rectangleShape.isEditing())
-        {
-            rectangleShape.isDrawn = true;
-        }
-    }
-}
+// DONE: put the drawing methods in a new class, which is responsible for drawing
 
 void ApplicationCore::DrawFreehand()
 {
@@ -392,162 +356,6 @@ void ApplicationCore::SetActivePen()
         activePen = CreatePen(penStyle, penWidth, penColor);
         SelectObject(memoryDCdrawing, activePen);
     }
-}
-
-void ApplicationCore::StartDrawingShape()
-{
-    switch (selectedShapeType)
-    {
-        case RectangleShapeType:
-            rectangleShape.mainWindow = mainWindow;
-            rectangleShape.StartSizing(mouse.LD());
-            break;
-        case LineShapeType:
-            break;
-        case FreehandShapeType:
-            freehandShape.mainWindow = mainWindow;
-            freehandShape.StartSizing(mouse.LD());
-            break;
-        case RouteShapeType:
-            routeShape.mainWindow = mainWindow;
-            routeShape.StartSizing(mouse.LD());
-            break;
-        default:
-            break;
-    }
-}
-
-void ApplicationCore::DrawingShape()
-{
-    switch (selectedShapeType)
-    {
-    case RectangleShapeType:
-        SizingRectangle();
-        //rectangleShape.Sizing(mouse.CurrentPosition(), mouse.MotionVector());
-        break;
-    case LineShapeType:
-        break;
-    case FreehandShapeType:
-        freehandShape.Sizing(mouse.PreviousPosition(), mouse.CurrentPosition());
-        break;
-    case RouteShapeType:
-        routeShape.Sizing(routeShape.anchor, mouse.CurrentPosition());
-        break;
-    default:
-        break;
-    }
-}
-
-void ApplicationCore::StopDrawingShape()
-{
-    switch (selectedShapeType)
-    {
-    case RectangleShapeType:
-        rectangleShape.StopSizing();
-        break;
-    case LineShapeType:
-        break;
-    case FreehandShapeType:
-        freehandShape.StopSizing();
-        break;
-    case RouteShapeType:
-        routeShape.StopSizing();
-        break;
-    default:
-        break;
-    }
-}
-
-void ApplicationCore::SizingRectangle()
-{
-    if (rectangleShape.isSizing && !rectangleShape.isMoving)
-    {
-        RECT rectToBeInvalidated = rectangleShape.rect;
-        long l = rectangleShape.anchor.x;
-        long r = mouse.CurrentPosition().x;
-        long t = rectangleShape.anchor.y;
-        long b = mouse.CurrentPosition().y;
-        rectangleShape.rect.left = r < l ? r : l;
-        rectangleShape.rect.right = l < r ? r : l;
-        rectangleShape.rect.top = b < t ? b : t;
-        rectangleShape.rect.bottom = t < b ? b : t;
-        SetRect(&rectToBeInvalidated,
-            rectangleShape.rect.left - abs(mouse.MotionVector().x) - 1,
-            rectangleShape.rect.top - abs(mouse.MotionVector().y) - 1,
-            rectangleShape.rect.right + abs(mouse.MotionVector().x) + 1,
-            rectangleShape.rect.bottom + abs(mouse.MotionVector().y)) + 1;
-        InvalidateRect(mainWindow, &rectToBeInvalidated, FALSE);
-        // This is for DEBUG:
-        //SetRect(&rectToBeInvalidated, rcClient.left, rcClient.top, 200, 200);
-        //InvalidateRect(mainWindow, &rectToBeInvalidated, FALSE);
-        //InvalidateRect(mainWindow, NULL, FALSE);
-        // This is for DEBUG:
-    }
-}
-
-void ApplicationCore::StartMovingRectangle()
-{
-    rectangleShape.isMoving = true;
-}
-
-void ApplicationCore::MoveRectangle()
-{
-    if (rectangleShape.isMoving)
-    {
-        RECT rectToBeInvalidated = rectangleShape.rect;
-        OffsetRect(&rectangleShape.rect, mouse.MotionVector().x, mouse.MotionVector().y);
-        rectangleShape.anchor.x += mouse.MotionVector().x;
-        rectangleShape.anchor.y += mouse.MotionVector().y;
-        SetRect(&rectToBeInvalidated,
-            rectangleShape.rect.left - abs(mouse.MotionVector().x),
-            rectangleShape.rect.top - abs(mouse.MotionVector().y),
-            rectangleShape.rect.right + abs(mouse.MotionVector().x),
-            rectangleShape.rect.bottom + abs(mouse.MotionVector().y));
-        InvalidateRect(mainWindow, &rectToBeInvalidated, FALSE);
-    }
-}
-
-void ApplicationCore::StopMovingRectangle()
-{
-    rectangleShape.isMoving = false;
-}
-
-void ApplicationCore::StartDraggingBackground()
-{
-    bgDragging = true;
-}
-
-// TODO: handle the background as a class, so it can have choosable color, and methods for moving, resizing, and so on
-
-void ApplicationCore::DraggingBackground()
-{
-    if (bgDragging)
-    {
-        memoryBitMapTopLeft.x -= mouse.MotionVector().x;
-        memoryBitMapTopLeft.y -= mouse.MotionVector().y;
-        if (memoryBitMapTopLeft.x < 0)
-        {
-            memoryBitMapTopLeft.x = 0;
-        }
-        if (memoryBitMapTopLeft.y < 0)
-        {
-            memoryBitMapTopLeft.y = 0;
-        }
-        if (memoryBitMapTopLeft.x > (rcMemory.right - rcMemory.left) - (rcClient.right - rcClient.left))
-        {
-            memoryBitMapTopLeft.x = (rcMemory.right - rcMemory.left) - (rcClient.right - rcClient.left);
-        }
-        if (memoryBitMapTopLeft.y > (rcMemory.bottom - rcMemory.top) - (rcClient.bottom - rcClient.top))
-        {
-            memoryBitMapTopLeft.y = (rcMemory.bottom - rcMemory.top) - (rcClient.bottom - rcClient.top);
-        }
-        InvalidateRect(mainWindow, NULL, FALSE);
-    }
-}
-
-void ApplicationCore::StopDraggingBackground()
-{
-    bgDragging = false;
 }
 
 void ApplicationCore::ShowColor()

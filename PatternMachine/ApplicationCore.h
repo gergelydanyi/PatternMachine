@@ -54,27 +54,13 @@ private:
 	RECT rcClient;
 	RECT rcMemory;
 	RECT rcRGB;
-	PatternMachine::Rectangle rectangleShape;
 	PatternMachine::Freehand freehandShape;
 	PatternMachine::Route routeShape;
 	ShapeType selectedShapeType;
-	void DrawRectangle();
 	void DrawFreehand();
 	void DrawRoute();
 	void DrawColorWheel();
 
-	void StartDrawingShape();
-	void DrawingShape();
-	void StopDrawingShape();
-
-	void SizingRectangle();
-	void FinishSizingRectangle();
-	void StartMovingRectangle();
-	void MoveRectangle();
-	void StopMovingRectangle();
-	void StartDraggingBackground();
-	void DraggingBackground();
-	void StopDraggingBackground();
 
 	void ShowColor();
 };

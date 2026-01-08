@@ -1,4 +1,6 @@
 #include "Canvas.h"
+#include "Line.h"
+#include "Rectangle.h"
 
 using namespace PatternMachine;
 
@@ -52,13 +54,12 @@ void Canvas::NewShape()
     {
     case LineShapeType:
     {
-        //pActiveShape = new Line(new Layer(hWindow));
-        pActiveShape = new Line(hWindow);
+        pActiveShape = new Line(this);
     }
         break;
     case RectangleShapeType:
     {
-        pActiveShape = new Rectangle(hWindow);
+        pActiveShape = new Rectangle(this);
     }
     }
     //pActiveShape->SetLayer(new Layer(hWindow));

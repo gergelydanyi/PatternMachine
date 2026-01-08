@@ -1,10 +1,10 @@
 #pragma once
 #include "framework.h"
 #include "MouseInfo.h"
-#include "Rectangle.h"
+//#include "Rectangle.h"
 #include "Shape.h"
 #include "Layer.h"
-#include "Line.h"
+//#include "Line.h"
 #include <vector>
 
 namespace PatternMachine
@@ -61,6 +61,7 @@ namespace PatternMachine
 
 		void DrawShape();
 		void DrawSelectedShapes();
+		void DrawSelectedShapes_old();
 		void DrawHitRegion();
 	};
 
