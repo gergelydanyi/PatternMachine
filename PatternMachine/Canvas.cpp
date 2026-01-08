@@ -1,6 +1,7 @@
 #include "Canvas.h"
 #include "Line.h"
 #include "Rectangle.h"
+#include "Ellipse.h"
 
 using namespace PatternMachine;
 
@@ -66,6 +67,12 @@ void Canvas::NewShape()
     {
         pActiveShape = new Rectangle(this);
     }
+    break;
+    case EllipseShapeType:
+    {
+        pActiveShape = new Ellipse(this);
+    }
+    break;
     }
     layers.push_back(pActiveShape->layer);
     //pActiveShape->mainWindow = hWindow;

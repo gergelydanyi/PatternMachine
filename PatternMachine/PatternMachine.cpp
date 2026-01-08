@@ -654,6 +654,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_SHAPE_RECTANGLE:
                 pAppCore->SelectShapeType(ShapeType::RectangleShapeType);
                 break;
+            case ID_SHAPE_ELLIPSE:
+                pAppCore->SelectShapeType(ShapeType::EllipseShapeType);
+                break;
             case ID_SHAPE_LINE:
                 pAppCore->SelectShapeType(ShapeType::LineShapeType);
                 break;

@@ -11,12 +11,11 @@ namespace PatternMachine
 	enum ShapeType
 	{
 		RectangleShapeType,
+		EllipseShapeType,
 		LineShapeType,
 		FreehandShapeType,
 		RouteShapeType
 	};
-
-	//class Layer;
 
 	class Shape
 	{

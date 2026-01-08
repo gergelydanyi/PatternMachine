@@ -111,7 +111,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>c:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x64\ComCtl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>c:\Program Files (x86)\Windows Kits\10\Lib\10.0.26100.0\um\x64\ComCtl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -135,6 +135,7 @@
     <ClInclude Include="ApplicationCore.h" />
     <ClInclude Include="Brush.h" />
     <ClInclude Include="Canvas.h" />
+    <ClInclude Include="Ellipse.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GeometricElements\Freehand.h" />
     <ClInclude Include="GeometricElements\Line.h" />
@@ -154,6 +155,7 @@
     <ClCompile Include="ApplicationCore.cpp" />
     <ClCompile Include="Brush.cpp" />
     <ClCompile Include="Canvas.cpp" />
+    <ClCompile Include="Ellipse.cpp" />
     <ClCompile Include="GeometricElements\Freehand.cpp" />
     <ClCompile Include="GeometricElements\Line.cpp" />
     <ClCompile Include="GeometricElements\Point.cpp" />
