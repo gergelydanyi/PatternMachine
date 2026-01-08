@@ -4,7 +4,7 @@
 
 namespace PatternMachine
 {
-
+	class Canvas;
 	class Line :
 		public Shape
 	{
@@ -14,6 +14,7 @@ namespace PatternMachine
 		Point p1;
 		Point p2;
 
+		Line(Canvas*);
 		Line(HWND);
 		Line(Layer*);
 		Line(Point&, Point&, Layer*);

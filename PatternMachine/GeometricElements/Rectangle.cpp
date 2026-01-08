@@ -1,15 +1,10 @@
 #include "Rectangle.h"
+#include "Canvas.h"
 
 namespace PatternMachine
 {
 
-    //RECT Rectangle::BoundingRectangle()
-    //{
-    //    RECT rc;
-    //    return rc;
-    //}
-
-    Rectangle::Rectangle() {}
+    Rectangle::Rectangle(Canvas* pCanvas) : Rectangle(new Layer(pCanvas)) {}
 
     Rectangle::Rectangle(HWND hwnd) : Rectangle(new Layer(hwnd)) {}
 
@@ -17,6 +12,7 @@ namespace PatternMachine
     {
         type = RectangleShapeType;
         SetLayer(pLayer);
+        mainWindow = layer->pCanvas->hWindow;
     }
 
     void Rectangle::StartSizing(POINT startPoint)
@@ -56,6 +52,7 @@ namespace PatternMachine
             InvalidateRect(mainWindow, &rectToBeInvalidated, FALSE);
             // This is necessary, because drawing leaves garbage on the screen
             // TODO: figure out why this is happening
+            // (2026.01.07.) It is messing the screen only when pen width is more than 1
             InvalidateRect(mainWindow, NULL, FALSE);
         }
     }

@@ -1,7 +1,10 @@
 #include "Line.h"
+#include "Canvas.h"
 
 namespace PatternMachine
 {
+	Line::Line(Canvas* pCanvas) : Line(new Layer(pCanvas)) {}
+
 	Line::Line(HWND hwnd) : Line(new Layer(hwnd)) {}
 
 	Line::Line(Layer* pLayer) : Line(*new Point(), *new Point(), pLayer) {}
@@ -14,6 +17,7 @@ namespace PatternMachine
 		points[0] = &p1;
 		points[1] = &p2;
 		SetLayer(pLayer);
+		mainWindow = layer->pCanvas->hWindow;
 	}
 
 	Line::~Line()
