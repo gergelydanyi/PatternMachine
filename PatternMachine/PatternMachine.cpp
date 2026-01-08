@@ -61,6 +61,7 @@
 #include "PatternMachine.h"
 #include "ApplicationCore.h"
 #include "Canvas.h"
+#include "commdlg.h"
 #include <time.h>
 #include <string>
 
@@ -420,6 +421,8 @@ HWND CreateComboBox(HWND hWndParent)
 HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox1, HWND hWndComboBox2)
 {
     // TODO: synchronize numButtons with the number of buttons in CreateShapesToolbar function
+
+    int numButtons = 8;
     INITCOMMONCONTROLSEX icex;
     icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
     icex.dwICC = ICC_COOL_CLASSES | ICC_BAR_CLASSES;
@@ -660,17 +663,53 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_SHAPE_ROUTE:
                 pAppCore->SelectShapeType(ShapeType::RouteShapeType);
                 break;
+            case ID_COLOR_INTERIOR:
+            {
+                // This code part is for changing the interior of the selected shapes
+                CHOOSECOLOR cc;
+                static COLORREF acrCustClr[16];
+                ZeroMemory(&cc, sizeof(cc));
+                cc.lStructSize = sizeof(cc);
+                cc.hwndOwner = hWnd;
+                cc.lpCustColors = (LPDWORD)acrCustClr;
+                cc.rgbResult = pAppCore->pCanvas->brushColor;
+                cc.Flags = CC_FULLOPEN | CC_RGBINIT;
+                if (ChooseColor(&cc) == TRUE)
+                {
+                    for (Shape* pShape : pAppCore->pCanvas->selectedShapes)
+                    {
+                        pShape->layer->SetBrush(CreateSolidBrush(cc.rgbResult));
+                        pShape->Refresh();
+                    }
+                }
+            }
+                break;
+            case ID_COLOR_BORDER:
+            {
+                // This code part is for changing the border of the selected shapes
+                CHOOSECOLOR cc;
+                static COLORREF acrCustClr[16];
+                ZeroMemory(&cc, sizeof(cc));
+                cc.lStructSize = sizeof(cc);
+                cc.hwndOwner = hWnd;
+                cc.lpCustColors = (LPDWORD)acrCustClr;
+                cc.rgbResult = pAppCore->pCanvas->penColor;
+                cc.Flags = CC_FULLOPEN | CC_RGBINIT;
+                if (ChooseColor(&cc) == TRUE)
+                {
+                    for (Shape* pShape : pAppCore->pCanvas->selectedShapes)
+                    {
+                        pShape->layer->SetPen(CreatePen(PS_SOLID, 1, cc.rgbResult));
+                        pShape->Refresh();
+                    }
+                }
+            }
+                break;
             case ID_PEN_SETTINGS:
                 DialogBoxParamW(hInst, MAKEINTRESOURCE(IDD_PEN_SETTINGS), hWnd, PenSettingsDialogProcess, (LPARAM)pAppCore);
                 break;
             case ID_BRUSH_SETTINGS:
                 DialogBoxParamW(hInst, MAKEINTRESOURCE(IDD_BRUSH_SETTINGS), hWnd, BrushSettingsDialogProcess, (LPARAM)pAppCore);
-                break;
-            case ID_COLOR_BORDER:
-            {
-                //pAppCore->penColor = 
-                    CreateColorPickerDialog(hWnd, pAppCore);
-            }
                 break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
@@ -948,9 +987,25 @@ INT_PTR CALLBACK BrushSettingsDialogProcess(HWND hDlg, UINT msg, WPARAM wParam, 
         {
         case IDC_BUTTON_CHANGE_BR_COLOR:
         {
+            // We change our own Dialog to the Common dialog:
+            /*
             pAppCore->pCanvas->brushColor = CreateColorPickerDialog(hDlg, pAppCore);
             HWND hCtl = GetDlgItem(hDlg, IDC_CURRENT_BRUSH_COLOR);
             SendMessageW(hCtl, WM_ENABLE, TRUE, 0);
+            */
+            CHOOSECOLOR cc;
+            static COLORREF acrCustClr[16];
+            ZeroMemory(&cc, sizeof(cc));
+            cc.lStructSize = sizeof(cc);
+            cc.hwndOwner = hDlg;
+            cc.lpCustColors = (LPDWORD)acrCustClr;
+            cc.rgbResult = pAppCore->pCanvas->brushColor;
+            cc.Flags = CC_FULLOPEN | CC_RGBINIT;
+            if (ChooseColor(&cc) == TRUE)
+            {
+                pAppCore->pCanvas->brushColor = cc.rgbResult;
+            }
+            
         }
         break;
         case IDOK:
