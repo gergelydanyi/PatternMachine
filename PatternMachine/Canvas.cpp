@@ -4,7 +4,7 @@
 
 using namespace PatternMachine;
 
-Canvas::Canvas(HWND hWndParent, HINSTANCE hInstance)
+Canvas::Canvas(HWND hWndParent, HINSTANCE hInstance) : penStyle(PS_SOLID), penWidth(1), penColor(RGB(255, 0, 255)), brushColor(RGB(0, 255, 255))
 {
     hWindow = CreateWindowW(
         L"Canvas",
@@ -16,13 +16,18 @@ Canvas::Canvas(HWND hWndParent, HINSTANCE hInstance)
         hInstance,
         this);
     SetupLayers();
+    //penStyle = PS_SOLID;
+
 }
 
 void Canvas::SetupLayers()
 {
-    pStage = new Layer(hWindow);
-    pStorage = new Layer(hWindow);
-    pDrawing = new Layer(hWindow);
+    //pStage = new Layer(hWindow);
+    pStage = new Layer(this);
+    //pStorage = new Layer(hWindow);
+    pStorage = new Layer(this);
+    //pDrawing = new Layer(hWindow);
+    pDrawing = new Layer(this);
 }
 
 void Canvas::SetActivePen()
@@ -62,12 +67,8 @@ void Canvas::NewShape()
         pActiveShape = new Rectangle(this);
     }
     }
-    //pActiveShape->SetLayer(new Layer(hWindow));
     layers.push_back(pActiveShape->layer);
-    //pActiveShape->layer->Reset();
-    //pActiveShape->layer->SetPen(CreatePen(penStyle, penWidth, penColor));
-    //pActiveShape->layer->SetBrush(CreateSolidBrush(brushColor));
-    pActiveShape->mainWindow = hWindow;
+    //pActiveShape->mainWindow = hWindow;
     shapes.push_back(pActiveShape);
 }
 
