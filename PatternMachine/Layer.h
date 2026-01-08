@@ -1,18 +1,16 @@
 #pragma once
 #include "framework.h"
 #include "vector"
-//#include "Shape.h"
-
 
 namespace PatternMachine
 
 {
 
 	class Shape;
+	class Canvas;
 
 	class Layer
 	{
-		//friend class Shape;
 	public:
 		HWND hWindow{};
 		HDC hDC{};
@@ -21,7 +19,9 @@ namespace PatternMachine
 		HBRUSH hBrush{};
 		RECT rect{};
 		std::vector<Shape*> shapes{};
+		Canvas* pCanvas;
 
+		Layer(Canvas*);
 		Layer(HWND);
 		~Layer();
 		void SetBitmap(HBITMAP);

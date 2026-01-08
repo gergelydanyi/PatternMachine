@@ -1,7 +1,15 @@
 #include "Layer.h"
+#include "Canvas.h"
 
 namespace PatternMachine
 {
+
+	Layer::Layer(Canvas* pCanvas) : Layer(pCanvas->hWindow)
+	{
+		this->pCanvas = pCanvas;
+		SetPen(CreatePen(pCanvas->penStyle, pCanvas->penWidth, pCanvas->penColor));
+		SetBrush(CreateSolidBrush(pCanvas->brushColor));
+	}
 
 	Layer::Layer(HWND clientWindow)
 	{
