@@ -70,7 +70,7 @@
 #include <CommCtrl.h>
 #include "shlwapi.h"
 
-// Enable Visual Style
+// Enable Visual Styles
 #if defined _M_IX86
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #elif defined _M_IA64
@@ -209,18 +209,18 @@ HWND CreateSimpleToolBar(HWND hWndParent)
     //UpdateWindow(hWndToolbar);
 }
 
-HWND CreateShapesToolBar(HWND hWndParent)
+HWND CreateShapesToolbar(HWND hWndParent)
 {
     const int ImageListID = 0;
-    const int numButtons = 4;
+    const int numButtons = 8;
     const int bitmapSize = 16;
 
-    const DWORD buttonStyles = BTNS_AUTOSIZE;
+    const DWORD buttonStyles = BTNS_CHECKGROUP;
     HWND hWndToolbar = CreateWindowExW(
         WS_EX_TOOLWINDOW,
         TOOLBARCLASSNAMEW,
         L"Shapes",
-        WS_CHILD | WS_OVERLAPPED | WS_VISIBLE /* | TBSTYLE_WRAPABLE */ | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NODIVIDER,
+        WS_CHILD | WS_OVERLAPPED | WS_VISIBLE | TBSTYLE_WRAPABLE | CCS_BOTTOM/* | CCS_NOPARENTALIGN*//* | CCS_NORESIZE*//* | CCS_NODIVIDER */,
         0, 0, 0, 0,
         hWndParent,
         NULL/*(HMENU)(int)102*/,
@@ -236,7 +236,7 @@ HWND CreateShapesToolBar(HWND hWndParent)
     HDC memoryDC = CreateCompatibleDC(clientDC);
     HBITMAP hBitmap = CreateCompatibleBitmap(clientDC, bitmapSize * numButtons, bitmapSize);
     HGDIOBJ hOrigBitmap = SelectObject(memoryDC, hBitmap);
-    RECT rect = { 0, 0, 64, 16 };
+    RECT rect = { 0, 0, 128, 16 };
     HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 0) | 0x00000001);
     HPEN hPen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
     SelectObject(memoryDC, hBrush);
@@ -261,7 +261,11 @@ HWND CreateShapesToolBar(HWND hWndParent)
         { MAKELONG(0, ImageListID), ID_SHAPE_RECTANGLE,  TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
         { MAKELONG(1, ImageListID), ID_SHAPE_LINE, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
         { MAKELONG(2, ImageListID), ID_SHAPE_FREEHAND, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
-        { MAKELONG(3, ImageListID), ID_SHAPE_ROUTE, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0}
+        { MAKELONG(3, ImageListID), ID_SHAPE_ROUTE, TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
+        { MAKELONG(4, ImageListID), ID_SHAPE_ELLIPSE,  TBSTATE_ENABLED, buttonStyles, {0}, 0, 0 },
+        { MAKELONG(5, ImageListID), ID_SHAPE_RECTANGLE,  TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
+        { MAKELONG(6, ImageListID), ID_SHAPE_RECTANGLE,  TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
+        { MAKELONG(7, ImageListID), ID_SHAPE_RECTANGLE,  TBSTATE_ENABLED, buttonStyles, {0}, 0, 0},
     };
     SendMessage(hWndToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
     SendMessage(hWndToolbar, TB_ADDBUTTONS, (WPARAM)numButtons, (LPARAM)&tbButtons);
@@ -415,7 +419,7 @@ HWND CreateComboBox(HWND hWndParent)
 
 HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox1, HWND hWndComboBox2)
 {
-    int numButtons = 3;
+    // TODO: synchronize numButtons with the number of buttons in CreateShapesToolbar function
     INITCOMMONCONTROLSEX icex;
     icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
     icex.dwICC = ICC_COOL_CLASSES | ICC_BAR_CLASSES;
@@ -447,7 +451,7 @@ HWND CreateReBar(HWND hWndOwner, HWND hWndToolbar, HWND hWndComboBox1, HWND hWnd
     rbBand.cbSize = sizeof(REBARBANDINFO);
     
     // toolbar must be created here, otherwise it is not aligned in the rebar
-    hWndToolbar = CreateShapesToolBar(hWndRebar);
+    hWndToolbar = CreateShapesToolbar(hWndRebar);
     if (hWndToolbar != NULL)
     {
         rbBand.fMask = RBBIM_STYLE | RBBIM_TEXT | RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_SIZE;
