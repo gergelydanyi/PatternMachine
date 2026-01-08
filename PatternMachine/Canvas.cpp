@@ -257,26 +257,6 @@ void Canvas::DrawShape()
     if (pActiveShape != 0 && !ActiveShape().isDrawn)
     {
         pActiveShape->layer->Reset();
-        /*switch (selectedShapeType)
-        {
-        case LineShapeType:
-        {
-            Line& line = (Line&)*pActiveShape;
-            //MoveToEx(pDrawing->hDC, line.p1.x, line.p1.y, NULL);
-            MoveToEx(pActiveShape->layer->hDC, line.p1.x, line.p1.y, NULL);
-            //LineTo(pDrawing->hDC, line.p2.x, line.p2.y);
-            LineTo(pActiveShape->layer->hDC, line.p2.x, line.p2.y);
-        }
-        break;
-        case RectangleShapeType:
-        {
-            Rectangle& rectangle = (Rectangle&)*pActiveShape;
-            //::Rectangle((*pDrawing).hDC, rectangle.rect.left, rectangle.rect.top, rectangle.rect.right, rectangle.rect.bottom);
-            ::Rectangle(pActiveShape->layer->hDC, rectangle.rect.left, rectangle.rect.top, rectangle.rect.right, rectangle.rect.bottom);
-        }
-        break;
-        }*/
-        // Instead of the above:
         pActiveShape->Draw();
         if (!ActiveShape().isEditing())
         {
@@ -290,27 +270,7 @@ void Canvas::DrawSelectedShapes()
     for (Shape* shape : selectedShapes)
     {
         shape->layer->Reset();
-        switch (shape->type)
-        {
-        case LineShapeType:
-        {
-            //Line& line = (Line&)*pActiveShape;
-            Line& line = (Line&)*shape;
-            //MoveToEx(pDrawing->hDC, line.p1.x, line.p1.y, NULL);
-            MoveToEx(shape->layer->hDC, line.p1.x, line.p1.y, NULL);
-            //LineTo(pDrawing->hDC, line.p2.x, line.p2.y);
-            LineTo(shape->layer->hDC, line.p2.x, line.p2.y);
-        }
-        break;
-        case RectangleShapeType:
-        {
-            //Rectangle& rectangle = (Rectangle&)*pActiveShape;
-            Rectangle& rectangle = (Rectangle&)*shape;
-            //::Rectangle((*pDrawing).hDC, rectangle.rect.left, rectangle.rect.top, rectangle.rect.right, rectangle.rect.bottom);
-            ::Rectangle(shape->layer->hDC, rectangle.rect.left, rectangle.rect.top, rectangle.rect.right, rectangle.rect.bottom);
-        }
-        break;
-        }
+        shape->Draw();
     }
 }
 
