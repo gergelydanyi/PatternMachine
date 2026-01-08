@@ -12,6 +12,11 @@ namespace PatternMachine
 	void Shape::Sizing(POINT, POINT) {}
 	void Shape::StopSizing() { isSizing = false; }
 	void Shape::MoveBy(POINT) {}
+	void Shape::Refresh()
+	{
+		isDrawn = false;
+		InvalidateRect(mainWindow, NULL, FALSE);
+	}
 	void Shape::Draw() {}
 	void Shape::SetLayer(Layer* layer) { this->layer = layer; }
 	void Shape::HitTest(POINT pCurrent, POINT pPrevious)

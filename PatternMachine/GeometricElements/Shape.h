@@ -31,6 +31,7 @@ namespace PatternMachine
 		virtual void Sizing(POINT, POINT);
 		virtual void StopSizing();
 		virtual void MoveBy(POINT);
+		void Refresh();
 		virtual void Draw();
 		void SetLayer(Layer*);
 		bool isSizing = false;
