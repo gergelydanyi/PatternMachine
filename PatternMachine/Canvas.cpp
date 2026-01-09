@@ -1,7 +1,8 @@
 #include "Canvas.h"
+#include "Ellipse.h"
 #include "Line.h"
 #include "Rectangle.h"
-#include "Ellipse.h"
+#include "Route.h"
 
 using namespace PatternMachine;
 
@@ -71,6 +72,11 @@ void Canvas::NewShape()
     case EllipseShapeType:
     {
         pActiveShape = new Ellipse(this);
+    }
+    break;
+    case RouteShapeType:
+    {
+        pActiveShape = new Route(this);
     }
     break;
     }

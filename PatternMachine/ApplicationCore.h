@@ -55,10 +55,10 @@ private:
 	RECT rcMemory;
 	RECT rcRGB;
 	PatternMachine::Freehand freehandShape;
-	PatternMachine::Route routeShape;
+	//PatternMachine::Route routeShape;
 	ShapeType selectedShapeType;
 	void DrawFreehand();
-	void DrawRoute();
+	//void DrawRoute();
 	void DrawColorWheel();
 
 

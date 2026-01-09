@@ -55,7 +55,6 @@ void ApplicationCore::On_WM_PAINT()
     // now we paint into the memory (the Draw methods use memoryDCfinal), and after this the final picture is copied to the screen
     BitBlt(memoryDCfinal, 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top, memoryDCstorage, 0, 0, SRCCOPY);
     DrawFreehand();
-    DrawRoute();
     GdiTransparentBlt(memoryDCfinal, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, memoryDCdrawing, 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, RGB(1, 1, 1));
     // reset the DC to transparent background color:
     RECT rc = { 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top };
@@ -211,31 +210,6 @@ void ApplicationCore::DrawFreehand()
 int Distance(POINT p1, POINT p2)
 {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
-}
-
-void ApplicationCore::DrawRoute()
-{
-    if (!routeShape.isDrawn)
-    {
-        if (routeShape.isEditing())
-        {
-            MoveToEx(memoryDCdrawing, routeShape.anchor.x, routeShape.anchor.y, NULL);
-            LineTo(memoryDCdrawing, routeShape.endPoint.x, routeShape.endPoint.y);
-        }
-        else
-        {
-            POINT startPoint = routeShape.routePoints[0];
-            POINT nextPoint;
-            MoveToEx(memoryDCdrawing, startPoint.x, startPoint.y, NULL);
-            for (int i = 1; i < routeShape.routePoints.size(); ++i)
-            {
-                nextPoint = routeShape.routePoints[i];
-                LineTo(memoryDCdrawing, nextPoint.x, nextPoint.y);
-            }
-            routeShape.isDrawn = true;
-        }
-    }
-
 }
 
 void ApplicationCore::DrawColorWheel()

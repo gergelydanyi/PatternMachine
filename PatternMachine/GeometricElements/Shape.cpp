@@ -32,6 +32,10 @@ namespace PatternMachine
 		DeleteObject(hitRegion);
 		hitRegion = CreateRoundRectRgn(rect.left - hitAreaWidth, rect.top - hitAreaWidth, rect.right + hitAreaWidth + 1, rect.bottom + hitAreaWidth + 1, hitAreaWidth, hitAreaWidth);
 	}
+	void Shape::MoveHitRegion(POINT p)
+	{
+		OffsetRgn(hitRegion, p.x, p.y);
+	}
 	RECT Shape::BoundingRectangle()
 	{
 		RECT rc;

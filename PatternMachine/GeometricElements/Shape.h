@@ -48,6 +48,7 @@ namespace PatternMachine
 
 		void HitTest(POINT, POINT);
 		virtual void SetHitRegion();
+		void MoveHitRegion(POINT);
 	private:
 		std::vector<POINT> vertices;
 		POINT topmostVertex;
