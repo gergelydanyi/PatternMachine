@@ -1,5 +1,6 @@
 #include "Canvas.h"
 #include "Ellipse.h"
+#include "Freehand.h"
 #include "Line.h"
 #include "Rectangle.h"
 #include "Route.h"
@@ -77,6 +78,11 @@ void Canvas::NewShape()
     case RouteShapeType:
     {
         pActiveShape = new Route(this);
+    }
+    break;
+    case FreehandShapeType:
+    {
+        pActiveShape = new Freehand(this);
     }
     break;
     }
@@ -270,7 +276,10 @@ void Canvas::DrawShape()
 {
     if (pActiveShape != 0 && !ActiveShape().isDrawn)
     {
-        pActiveShape->layer->Reset();
+        if (pActiveShape->type != FreehandShapeType)
+        {
+            pActiveShape->layer->Reset();
+        }
         pActiveShape->Draw();
         if (!ActiveShape().isEditing())
         {

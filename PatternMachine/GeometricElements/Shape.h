@@ -26,6 +26,7 @@ namespace PatternMachine
 		~Shape();
 		POINT anchor;
 		RECT rect = { 0, 0, 100, 100 };
+		std::vector<POINT> vertices;
 		virtual RECT BoundingRectangle();
 		bool isEditing();
 		virtual void StartSizing(POINT);
@@ -50,7 +51,6 @@ namespace PatternMachine
 		virtual void SetHitRegion();
 		void MoveHitRegion(POINT);
 	private:
-		std::vector<POINT> vertices;
 		POINT topmostVertex;
 		POINT rightmostVertex;
 		POINT bottommostVertex;

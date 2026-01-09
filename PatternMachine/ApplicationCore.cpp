@@ -54,7 +54,6 @@ void ApplicationCore::On_WM_PAINT()
     // Formerly we painted directly to the screen after copying the previous bitmap stored in memory,
     // now we paint into the memory (the Draw methods use memoryDCfinal), and after this the final picture is copied to the screen
     BitBlt(memoryDCfinal, 0, 0, rcMemory.right - rcMemory.left, rcMemory.bottom - rcMemory.top, memoryDCstorage, 0, 0, SRCCOPY);
-    DrawFreehand();
     GdiTransparentBlt(memoryDCfinal, memoryBitMapTopLeft.x, memoryBitMapTopLeft.y, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, memoryDCdrawing, 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, RGB(1, 1, 1));
     // reset the DC to transparent background color:
     RECT rc = { 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top };
@@ -186,24 +185,6 @@ void ApplicationCore::ChangeCanvasBehaviour(CanvasBehaviour behaviour)
 }
 
 // DONE: put the drawing methods in a new class, which is responsible for drawing
-
-void ApplicationCore::DrawFreehand()
-{
-    if (freehandShape.isSizing)
-    {
-        if (freehandShape.previousPoint.x == freehandShape.currentPoint.x &&
-            freehandShape.previousPoint.y == freehandShape.currentPoint.y)
-        {
-            SetPixelV(memoryDCdrawing, freehandShape.previousPoint.x, freehandShape.previousPoint.y, RGB(200, 200, 0));
-        }
-        else
-        {
-            MoveToEx(memoryDCdrawing, freehandShape.previousPoint.x, freehandShape.previousPoint.y, NULL);
-            LineTo(memoryDCdrawing, freehandShape.currentPoint.x, freehandShape.currentPoint.y);
-        }
-        freehandShape.previousPoint = freehandShape.currentPoint;
-    }
-}
 
 // TODO: put this method in an outer class, because it is used in several classes
 

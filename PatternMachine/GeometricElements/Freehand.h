@@ -8,9 +8,16 @@ class Freehand :
     public Shape
 {
 public:
-    void StartSizing(POINT);
-    void Sizing(POINT, POINT);
-    void StopSizing();
+    Freehand(Canvas*);
+    Freehand(HWND);
+    Freehand(Layer*);
+    void StartSizing(POINT) override;
+    void Sizing(POINT, POINT) override;
+    void StopSizing() override;
+    void SetHitRegion() override;
+    HRGN SetSegmentHitRegion(Point*, Point*);
+    void MoveBy(POINT) override;
+    void Draw() override;
     POINT previousPoint;
     POINT currentPoint;
 private:
