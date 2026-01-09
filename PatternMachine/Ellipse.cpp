@@ -72,12 +72,12 @@ namespace PatternMachine
         SetHitRegion();
         InvalidateRect(mainWindow, NULL, FALSE);
     }
-
+    
     void Ellipse::SetHitRegion()
     {
         long hitAreaWidth = 5;
         DeleteObject(hitRegion);
-        hitRegion = CreateRoundRectRgn(rect.left - hitAreaWidth, rect.top - hitAreaWidth, rect.right + hitAreaWidth + 1, rect.bottom + hitAreaWidth + 1, hitAreaWidth, hitAreaWidth);
+        hitRegion = CreateEllipticRgn(rect.left - hitAreaWidth, rect.top - hitAreaWidth, rect.right + hitAreaWidth + 1, rect.bottom + hitAreaWidth + 1);
     }
 
     void Ellipse::Draw()

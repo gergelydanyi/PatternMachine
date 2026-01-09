@@ -26,7 +26,12 @@ namespace PatternMachine
 			InvalidateRect(mainWindow, NULL, FALSE);
 		}
 	}
-	void Shape::SetHitRegion() {}
+	void Shape::SetHitRegion()
+	{
+		long hitAreaWidth = 5;
+		DeleteObject(hitRegion);
+		hitRegion = CreateRoundRectRgn(rect.left - hitAreaWidth, rect.top - hitAreaWidth, rect.right + hitAreaWidth + 1, rect.bottom + hitAreaWidth + 1, hitAreaWidth, hitAreaWidth);
+	}
 	RECT Shape::BoundingRectangle()
 	{
 		RECT rc;
