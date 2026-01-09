@@ -890,9 +890,24 @@ INT_PTR CALLBACK PenSettingsDialogProcess(HWND hDlg, UINT msg, WPARAM wParam, LP
         {
         case IDC_BTN_CHANGE_COLOR:
         {
+            // We change our own Dialog to the Common dialog:
+            /*
             pAppCore->pCanvas->penColor = CreateColorPickerDialog(hDlg, pAppCore);
             HWND hCtl = GetDlgItem(hDlg, IDC_CURRENT_COLOR);
             SendMessageW(hCtl, WM_ENABLE, TRUE, 0);
+            */
+            CHOOSECOLOR cc;
+            static COLORREF acrCustClr[16];
+            ZeroMemory(&cc, sizeof(cc));
+            cc.lStructSize = sizeof(cc);
+            cc.hwndOwner = hDlg;
+            cc.lpCustColors = (LPDWORD)acrCustClr;
+            cc.rgbResult = pAppCore->pCanvas->penColor;
+            cc.Flags = CC_FULLOPEN | CC_RGBINIT;
+            if (ChooseColor(&cc) == TRUE)
+            {
+                pAppCore->pCanvas->penColor = cc.rgbResult;
+            }
         }
         break;
         case IDOK:
