@@ -288,7 +288,7 @@ void Canvas::DrawHitRegion()
     {
         if (!pShape->isEditing() && pShape->isDrawn && PtInRegion(pShape->hitRegion, mouse.X(), mouse.Y()) > 0)
         {
-            FrameRgn(pDrawing->hDC, pShape->hitRegion, pDrawing->hBrush, 1, 1);
+            FrameRgn(pDrawing->hDC, pShape->hitRegion, pDrawing->hBrush, 2, 2);
         }
     }
     for (Shape* pShape : selectedShapes)

@@ -1,6 +1,7 @@
 #pragma once
 #include "framework.h"
 #include "Pen.h"
+#include "Point.h"
 #include "Brush.h"
 #include "Layer.h"
 #include <vector>

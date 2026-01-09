@@ -1,5 +1,4 @@
 #pragma once
-#include "Point.h"
 #include "Shape.h"
 
 namespace PatternMachine
