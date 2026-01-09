@@ -6,7 +6,7 @@ public:
 	long x{};
 	long y{};
 
-	Point();
+	Point() : Point(0, 0) {};
 	Point(long, long);
 	~Point();
 	void MoveBy(long, long);
