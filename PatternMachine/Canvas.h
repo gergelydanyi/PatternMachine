@@ -1,10 +1,8 @@
 #pragma once
 #include "framework.h"
 #include "MouseInfo.h"
-//#include "Rectangle.h"
 #include "Shape.h"
 #include "Layer.h"
-//#include "Line.h"
 #include <vector>
 
 namespace PatternMachine
@@ -38,7 +36,7 @@ namespace PatternMachine
 		bool selectionMode = true;
 		bool movingMode = false;
 		CanvasBehaviour behaviour = Drawing;
-
+		RECT selectorRect = { 0, 0, 0, 0 };
 		Canvas(HWND, HINSTANCE);
 		void SetupLayers();
 		void On_WM_PAINT(WPARAM, LPARAM);
@@ -58,10 +56,11 @@ namespace PatternMachine
 		Layer* pStage{};
 		Layer* pStorage{};
 		Layer* pDrawing{};
+		Layer* pSelector{};
 
 		void DrawShape();
 		void DrawSelectedShapes();
-		void DrawSelectedShapes_old();
+		void DrawSelectorRectangle();
 		void DrawHitRegion();
 	};
 

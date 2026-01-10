@@ -648,6 +648,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_SELECTIONMODE_SIMPLE:
                 pAppCore->ChangeCanvasBehaviour(PointingSelection);
                 break;
+            case ID_ROUNDING_RECTANGLE:
+                pAppCore->ChangeCanvasBehaviour(FramingSelection);
+                break;
             case ID_EDIT_DRAWINGMODE:
                 pAppCore->ChangeCanvasBehaviour(Drawing);
                 break;

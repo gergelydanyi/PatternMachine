@@ -25,12 +25,13 @@ Canvas::Canvas(HWND hWndParent, HINSTANCE hInstance) : penStyle(PS_SOLID), penWi
 
 void Canvas::SetupLayers()
 {
-    //pStage = new Layer(hWindow);
     pStage = new Layer(this);
-    //pStorage = new Layer(hWindow);
     pStorage = new Layer(this);
-    //pDrawing = new Layer(hWindow);
     pDrawing = new Layer(this);
+    pSelector = new Layer(this);
+    pSelector->SetPen(CreatePen(PS_DASH, 1, RGB(170, 170, 170)));
+    pSelector->SetBrush(CreateSolidBrush(RGB(1, 1, 1)));
+
 }
 
 void Canvas::SetActivePen()
@@ -87,7 +88,6 @@ void Canvas::NewShape()
     break;
     }
     layers.push_back(pActiveShape->layer);
-    //pActiveShape->mainWindow = hWindow;
     shapes.push_back(pActiveShape);
 }
 
@@ -176,6 +176,11 @@ void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
     mouse.On_WM_LBUTTONDOWN(lParam);
     switch (behaviour)
     {
+    case FramingSelection:
+    {
+        selectorRect = { mouse.LD().x, mouse.LD().y, mouse.LD().x, mouse.LD().y };
+    }
+        break;
     case PointingSelection:
     {
         bool CtrlPressed = wParam & MK_CONTROL;
@@ -196,6 +201,26 @@ void Canvas::On_WM_LBUTTONUP(WPARAM wParam, LPARAM lParam)
     mouse.On_WM_LBUTTONUP(lParam);
     switch (behaviour)
     {
+    case FramingSelection:
+    {
+        for (Shape* pShape : selectedShapes)
+        {
+            pShape->isSelected = false;
+        }
+        selectedShapes.clear();
+        for (Shape* pShape : shapes)
+        {
+            // TODO:choose shapes which have intersection with the selector rectangle
+            BOOL intersect = RectInRegion(pShape->hitRegion, &selectorRect);
+            if (intersect != 0)
+            {
+                pShape->isSelected = true;
+                selectedShapes.push_back(pShape);
+            }
+        }
+        InvalidateRect(hWindow, NULL, FALSE);
+    }
+        break;
     case PointingSelection:
         break;
     case Drawing:
@@ -209,6 +234,49 @@ void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
     mouse.On_WM_MOUSEMOVE(lParam);
     switch (behaviour)
     {
+    case FramingSelection:
+    {
+        if (mouse.LeftButtonPressed())
+        {
+            if (mouse.CurrentPosition().x < mouse.LD().x)
+            {
+                selectorRect.left = mouse.CurrentPosition().x;
+                selectorRect.right = mouse.LD().x;
+            }
+            else
+            {
+                selectorRect.left = mouse.LD().x;
+                selectorRect.right = mouse.CurrentPosition().x;
+            }
+            if (mouse.CurrentPosition().y < mouse.LD().y)
+            {
+                selectorRect.top = mouse.CurrentPosition().y;
+                selectorRect.bottom = mouse.LD().y;
+            }
+            else
+            {
+                selectorRect.top = mouse.LD().y;
+                selectorRect.bottom = mouse.CurrentPosition().y;
+            }
+            for (Shape* pShape : selectedShapes)
+            {
+                pShape->isSelected = false;
+            }
+            selectedShapes.clear();
+            for (Shape* pShape : shapes)
+            {
+                // TODO:choose shapes which have intersection with the selector rectangle
+                BOOL intersect = RectInRegion(pShape->hitRegion, &selectorRect);
+                if (intersect != 0)
+                {
+                    pShape->isSelected = true;
+                    selectedShapes.push_back(pShape);
+                }
+            }
+            InvalidateRect(hWindow, NULL, FALSE);
+        }
+    }
+        break;
     case PointingSelection:
     {
         if (mouse.LeftButtonPressed())
@@ -246,21 +314,31 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
     pStage->Reset();
     DrawShape();
     DrawSelectedShapes();
+    DrawSelectorRectangle();
+    // layer -> pStage
     for (Layer* layer : layers)
     {
         GdiTransparentBlt(pStage->hDC, 0, 0, pStage->rect.right - pStage->rect.left, pStage->rect.bottom - pStage->rect.top, layer->hDC, 0, 0, layer->rect.right - layer->rect.left, layer->rect.bottom - layer->rect.top, RGB(1, 1, 1));
     }
-
-
+    // pDrawing -> pStage | pDrawing contains the hitRegions
     GdiTransparentBlt((*pStage).hDC, 0, 0, (*pStage).rect.right - (*pStage).rect.left, (*pStage).rect.bottom - (*pStage).rect.top, (*pDrawing).hDC, 0, 0, (*pDrawing).rect.right - (*pDrawing).rect.left, (*pDrawing).rect.bottom - (*pDrawing).rect.top, RGB(1, 1, 1));
-
     (*pDrawing).Reset();
+    // pSelector -> pStage
+    if (behaviour == FramingSelection)
+    {
+        // TODO: place selector rectangle drawing in a separate method; set the interior opac and the border to dashed line
+        ::Rectangle(pSelector->hDC, selectorRect.left, selectorRect.top, selectorRect.right, selectorRect.bottom);
 
+        GdiTransparentBlt((*pStage).hDC, 0, 0, (*pStage).rect.right - (*pStage).rect.left, (*pStage).rect.bottom - (*pStage).rect.top, (*pSelector).hDC, 0, 0, (*pSelector).rect.right - (*pSelector).rect.left, (*pSelector).rect.bottom - (*pSelector).rect.top, RGB(1, 1, 1));
+        (*pSelector).Reset();
+    }
+    // pStage -> pStorage
     if (pActiveShape != 0 && !ActiveShape().isEditing())
     {
         BitBlt((*pStorage).hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pStage).hDC, 0, 0, SRCCOPY);
     }
-    if (behaviour == PointingSelection)
+    // pDrawing -> pStage
+    if (behaviour == PointingSelection || behaviour == FramingSelection)
     {
         DrawHitRegion();
         GdiTransparentBlt((*pStage).hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pDrawing).hDC, 0, 0, (*pDrawing).rect.right - (*pDrawing).rect.left, (*pDrawing).rect.bottom - (*pDrawing).rect.top, RGB(1, 1, 1));
@@ -271,6 +349,8 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
 
     EndPaint(hWindow, &ps);
 }
+
+
 
 void Canvas::DrawShape()
 {
@@ -295,6 +375,11 @@ void Canvas::DrawSelectedShapes()
         shape->layer->Reset();
         shape->Draw();
     }
+}
+
+void Canvas::DrawSelectorRectangle()
+{
+
 }
 
 void Canvas::DrawHitRegion()

@@ -184,8 +184,6 @@ void ApplicationCore::ChangeCanvasBehaviour(CanvasBehaviour behaviour)
     pCanvas->ChangeBehaviour(behaviour);
 }
 
-// DONE: put the drawing methods in a new class, which is responsible for drawing
-
 // TODO: put this method in an outer class, because it is used in several classes
 
 int Distance(POINT p1, POINT p2)
