@@ -98,6 +98,7 @@ void Canvas::ChangeBehaviour(CanvasBehaviour behaviour)
 
 void Canvas::SelectHighlightedShapes(bool CtrlPressed)
 {
+    // If CTRL is not pressed, erase all selection
     if (!CtrlPressed)
     {
         for (Shape* pShape : selectedShapes)
@@ -183,8 +184,8 @@ void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
         break;
     case PointingSelection:
     {
-        bool CtrlPressed = wParam & MK_CONTROL;
-        SelectHighlightedShapes(CtrlPressed);
+        selectionMode = true;
+        copyMode = wParam& MK_CONTROL; // CTRL pressed
     }
         break;
     case Drawing:
@@ -222,6 +223,13 @@ void Canvas::On_WM_LBUTTONUP(WPARAM wParam, LPARAM lParam)
     }
         break;
     case PointingSelection:
+        if (selectionMode)
+        {
+            bool CtrlPressed = wParam & MK_CONTROL;
+            SelectHighlightedShapes(CtrlPressed);
+            selectionMode = false;
+        }
+        copyMode = false;
         break;
     case Drawing:
         ActiveShape().StopSizing();
@@ -281,10 +289,39 @@ void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
     {
         if (mouse.LeftButtonPressed())
         {
+            bool CtrlPressed = wParam & MK_CONTROL;
+            bool mouseOverSelection = false;
             for (Shape* pShape : selectedShapes)
             {
-                pShape->MoveBy(mouse.MotionVector());
+                mouseOverSelection |= PtInRegion(pShape->hitRegion, mouse.CurrentPosition().x, mouse.CurrentPosition().y);
             }
+            if (selectionMode && !mouseOverSelection)
+            {
+                SelectHighlightedShapes(CtrlPressed);
+                selectionMode = false;
+            }
+            if (mouseOverSelection)
+            {
+                if (CtrlPressed)
+                {
+                    if (copyMode)
+                    {
+                        for (Shape* pShape : selectedShapes)
+                        {
+                            Shape* newShape = pShape->Clone();
+                            layers.push_back(newShape->layer);
+                            shapes.push_back(newShape);
+                            newShape->Draw();
+                        }
+                        copyMode = false;
+                    }
+                }
+                for (Shape* pShape : selectedShapes)
+                {
+                    pShape->MoveBy(mouse.MotionVector());
+                }
+            }
+            selectionMode = false;
         }
         else
         {

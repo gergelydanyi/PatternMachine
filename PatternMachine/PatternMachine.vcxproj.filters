@@ -69,7 +69,7 @@
     <ClInclude Include="Tool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Ellipse.h">
+    <ClInclude Include="GeometricElements\Ellipse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -119,8 +119,8 @@
     <ClCompile Include="Tool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ellipse.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="GeometricElements\Ellipse.cpp">
+      <Filter>Source Files\Geometric Elements</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

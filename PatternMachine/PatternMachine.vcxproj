@@ -135,8 +135,8 @@
     <ClInclude Include="ApplicationCore.h" />
     <ClInclude Include="Brush.h" />
     <ClInclude Include="Canvas.h" />
-    <ClInclude Include="Ellipse.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="GeometricElements\Ellipse.h" />
     <ClInclude Include="GeometricElements\Freehand.h" />
     <ClInclude Include="GeometricElements\Line.h" />
     <ClInclude Include="GeometricElements\Point.h" />
@@ -155,7 +155,7 @@
     <ClCompile Include="ApplicationCore.cpp" />
     <ClCompile Include="Brush.cpp" />
     <ClCompile Include="Canvas.cpp" />
-    <ClCompile Include="Ellipse.cpp" />
+    <ClCompile Include="GeometricElements\Ellipse.cpp" />
     <ClCompile Include="GeometricElements\Freehand.cpp" />
     <ClCompile Include="GeometricElements\Line.cpp" />
     <ClCompile Include="GeometricElements\Point.cpp" />

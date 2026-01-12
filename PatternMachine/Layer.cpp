@@ -19,7 +19,7 @@ namespace PatternMachine
 		hDC = CreateCompatibleDC(clientDC);
 		SetBitmap(CreateCompatibleBitmap(clientDC, rect.right - rect.left, rect.bottom - rect.top));
 		SetPen(CreatePen(PS_SOLID, 1, RGB(0, 255, 0)));
-		SetBrush(CreateSolidBrush(RGB(255, 0, 0)));
+		SetBrush(CreateSolidBrush(RGB(128, 128, 128)));
 		SetBkMode(hDC, TRANSPARENT);
 		ReleaseDC(clientWindow, clientDC);
 		Reset();

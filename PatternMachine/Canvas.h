@@ -32,9 +32,11 @@ namespace PatternMachine
 		std::vector<Shape*> selectedShapes;
 		Shape* pActiveShape;
 		ShapeType selectedShapeType = LineShapeType;
+		// TODO: introduce CanvasOperation class that derives operations which responsible for controlling selecting, moving, editing and all other operations that occurs on Canvas
 		bool editingMode = false;
-		bool selectionMode = true;
+		bool selectionMode = false;
 		bool movingMode = false;
+		bool copyMode = false;
 		CanvasBehaviour behaviour = Drawing;
 		RECT selectorRect = { 0, 0, 0, 0 };
 		Canvas(HWND, HINSTANCE);
