@@ -13,7 +13,7 @@ Canvas::Canvas(HWND hWndParent, HINSTANCE hInstance) : penStyle(PS_SOLID), penWi
         L"Canvas",
         (LPCTSTR)NULL,
         WS_CHILD | WS_VISIBLE,
-        0, 30, 800, 600,
+        30, 60, 1200, 900,
         hWndParent,
         nullptr,
         hInstance,
@@ -316,6 +316,11 @@ void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
                         copyMode = false;
                     }
                 }
+                if (selectedShapes.size() < 2)
+                {
+                    SelectHighlightedShapes(CtrlPressed);
+                    selectionMode = false;
+                }
                 for (Shape* pShape : selectedShapes)
                 {
                     pShape->MoveBy(mouse.MotionVector());
@@ -381,7 +386,7 @@ void Canvas::On_WM_PAINT(WPARAM wParam, LPARAM lParam)
         GdiTransparentBlt((*pStage).hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pDrawing).hDC, 0, 0, (*pDrawing).rect.right - (*pDrawing).rect.left, (*pDrawing).rect.bottom - (*pDrawing).rect.top, RGB(1, 1, 1));
         (*pDrawing).Reset();
     }
-    
+    // pStage -> ClientScreen
     BitBlt(hDC, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, (*pStage).hDC, 0, 0, SRCCOPY);
 
     EndPaint(hWindow, &ps);

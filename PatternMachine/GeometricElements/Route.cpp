@@ -14,6 +14,21 @@ namespace PatternMachine {
 		mainWindow = layer->pCanvas->hWindow;
 	}
 
+	Route* Route::Clone()
+	{
+		Route* clone = new Route(layer->pCanvas);
+		clone->anchor = this->anchor;
+		clone->rect = this->rect;
+		clone->vertices = this->vertices;
+		clone->routePoints = this->routePoints; // TODO use vertices instead of routePoints
+		clone->type = this->type;
+		clone->mainWindow = this->mainWindow;
+		clone->layer->SetPen(this->layer->hPen);
+		clone->layer->SetBrush(this->layer->hBrush);
+		clone->SetHitRegion();
+		return clone;
+	}
+
 	void Route::StartSizing(POINT startPoint)
 	{
 		isSizing = true;

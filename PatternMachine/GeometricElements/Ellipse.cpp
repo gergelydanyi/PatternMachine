@@ -1,23 +1,23 @@
-#include "Rectangle.h"
+#include "Ellipse.h"
 #include "Canvas.h"
 
 namespace PatternMachine
 {
 
-    Rectangle::Rectangle(Canvas* pCanvas) : Rectangle(new Layer(pCanvas)) {}
+	Ellipse::Ellipse(Canvas* pCanvas) : Ellipse(new Layer(pCanvas)) {}
 
-    Rectangle::Rectangle(HWND hwnd) : Rectangle(new Layer(hwnd)) {}
+	Ellipse::Ellipse(HWND hwnd) : Ellipse(new Layer(hwnd)) {}
 
-    Rectangle::Rectangle(Layer* pLayer)
+	Ellipse::Ellipse(Layer* pLayer)
+	{
+		type = EllipseShapeType;
+		SetLayer(pLayer);
+		mainWindow = pLayer->pCanvas->hWindow;
+	}
+
+    Ellipse* Ellipse::Clone()
     {
-        type = RectangleShapeType;
-        SetLayer(pLayer);
-        mainWindow = layer->pCanvas->hWindow;
-    }
-
-    Rectangle* Rectangle::Clone()
-    {
-        Rectangle* clone = new Rectangle(layer->pCanvas);
+        Ellipse* clone = new Ellipse(layer->pCanvas);
         clone->anchor = this->anchor;
         clone->rect = this->rect;
         clone->vertices = this->vertices;
@@ -30,7 +30,7 @@ namespace PatternMachine
         return clone;
     }
 
-    void Rectangle::StartSizing(POINT startPoint)
+    void Ellipse::StartSizing(POINT startPoint)
     {
         if (!isMoving)
         {
@@ -43,8 +43,7 @@ namespace PatternMachine
         isSizing = true;
         isDrawn = false;
     }
-
-    void Rectangle::Sizing(POINT movingCorner, POINT motionVector)
+    void Ellipse::Sizing(POINT movingCorner, POINT motionVector)
     {
         if (isSizing && !isMoving)
         {
@@ -72,14 +71,14 @@ namespace PatternMachine
         }
     }
 
-    void Rectangle::StopSizing()
+    void Ellipse::StopSizing()
     {
         SetHitRegion();
         isSizing = false;
         InvalidateRect(mainWindow, &rect, FALSE);
     }
 
-    void Rectangle::MoveBy(POINT p1)
+    void Ellipse::MoveBy(POINT p1)
     {
         rect.left += p1.x;
         rect.top += p1.y;
@@ -88,17 +87,18 @@ namespace PatternMachine
         SetHitRegion();
         InvalidateRect(mainWindow, NULL, FALSE);
     }
-
-    void Rectangle::SetHitRegion()
+    
+    void Ellipse::SetHitRegion()
     {
         long hitAreaWidth = 5;
         DeleteObject(hitRegion);
-        hitRegion = CreateRoundRectRgn(rect.left - hitAreaWidth, rect.top - hitAreaWidth, rect.right + hitAreaWidth + 1, rect.bottom + hitAreaWidth + 1, hitAreaWidth, hitAreaWidth);
+        hitRegion = CreateEllipticRgn(rect.left - hitAreaWidth, rect.top - hitAreaWidth, rect.right + hitAreaWidth + 1, rect.bottom + hitAreaWidth + 1);
     }
 
-    void Rectangle::Draw()
+    void Ellipse::Draw()
     {
-        ::Rectangle(layer->hDC, rect.left, rect.top, rect.right, rect.bottom);
+        ::Ellipse(layer->hDC, rect.left, rect.top, rect.right, rect.bottom);
     }
+
 
 }

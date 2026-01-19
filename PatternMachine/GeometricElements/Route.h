@@ -12,6 +12,7 @@ public:
     Route(Canvas*);
     Route(HWND);
     Route(Layer* pLayer);
+    Route* Clone() override;
     void StartSizing(POINT) override;
     void Sizing(POINT, POINT) override;
     void StopSizing() override;

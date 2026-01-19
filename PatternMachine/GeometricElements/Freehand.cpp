@@ -13,6 +13,21 @@ namespace PatternMachine
 		mainWindow = layer->pCanvas->hWindow;
 	}
 
+	Freehand* Freehand::Clone()
+	{
+		Freehand* clone = new Freehand(layer->pCanvas);
+		clone->anchor = this->anchor;
+		clone->rect = this->rect;
+		clone->vertices = this->vertices;
+
+		clone->type = this->type;
+		clone->mainWindow = this->mainWindow;
+		clone->layer->SetPen(this->layer->hPen);
+		clone->layer->SetBrush(this->layer->hBrush);
+		clone->SetHitRegion();
+		return clone;
+	}
+
 	void Freehand::StartSizing(POINT startPoint)
 	{
 		isSizing = true;

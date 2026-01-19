@@ -22,8 +22,11 @@ namespace PatternMachine
 	{
 	public:
 		Shape();
+		Shape(Canvas*);
+		Shape(HWND);
 		Shape(Layer*);
 		~Shape();
+		virtual Shape* Clone();
 		POINT anchor;
 		RECT rect = { 0, 0, 100, 100 };
 		std::vector<POINT> vertices;

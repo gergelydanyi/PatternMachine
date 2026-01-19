@@ -4,14 +4,14 @@
 namespace PatternMachine
 {
     class Canvas;
-    class Rectangle :
+    class Ellipse :
         public Shape
     {
     public:
-        Rectangle(Canvas*);
-        Rectangle(HWND);
-        Rectangle(Layer* pLayer);
-        Rectangle* Clone() override;
+        Ellipse(Canvas*);
+        Ellipse(HWND);
+        Ellipse(Layer* pLayer);
+        Ellipse* Clone() override;
         void StartSizing(POINT) override;
         void Sizing(POINT, POINT) override;
         void StopSizing() override;
@@ -19,5 +19,5 @@ namespace PatternMachine
         void MoveBy(POINT) override;
         void Draw() override;
     };
-
 }
+

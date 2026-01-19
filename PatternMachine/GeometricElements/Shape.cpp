@@ -5,8 +5,24 @@ namespace PatternMachine
 
 	// TODO: add inner color
 	Shape::Shape() {}
+	Shape::Shape(Canvas* pCanvas) {}
+	Shape::Shape(HWND) {}
 	Shape::Shape(Layer* l) { SetLayer(l); }
 	Shape::~Shape() { delete layer; }
+	Shape* Shape::Clone()
+	{
+		Shape* clone = new Shape(layer->pCanvas);
+		clone->anchor = this->anchor;
+		clone->rect = this->rect;
+		clone->vertices = this->vertices;
+
+		clone->type = this->type;
+		clone->mainWindow = this->mainWindow;
+		clone->layer->SetPen(this->layer->hPen);
+		clone->layer->SetBrush(this->layer->hBrush);
+		clone->SetHitRegion();
+		return clone;
+	}
 	bool Shape::isEditing()	{ return isSizing || isMoving; }
 	void Shape::StartSizing(POINT) {}
 	void Shape::Sizing(POINT, POINT) {}

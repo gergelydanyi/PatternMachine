@@ -26,6 +26,24 @@ namespace PatternMachine
 		delete& p2;
 	}
 
+	Line* Line::Clone()
+	{
+		Line* clone = new Line(layer->pCanvas);
+		clone->anchor = this->anchor;
+		clone->rect = this->rect;
+		clone->vertices = this->vertices;
+		clone->p1 = this->p1;
+		clone->p2 = this->p2;
+		//clone->points[0] = &(clone->p1);
+		//clone->points[1] = &(clone->p2);
+		clone->type = this->type;
+		clone->mainWindow = this->mainWindow;
+		clone->layer->SetPen(this->layer->hPen);
+		clone->layer->SetBrush(this->layer->hBrush);
+		clone->SetHitRegion();
+		return clone;
+	}
+
 	void Line::StartSizing(POINT p)
 	{
 		p1.MoveTo(p.x, p.y);

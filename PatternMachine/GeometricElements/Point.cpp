@@ -28,3 +28,8 @@ long Point::operator-(Point p)
 {
 	return sqrt(pow(x - p.x, 2) + pow(y - p.y, 2));
 }
+
+void Point::operator=(Point p)
+{
+	MoveTo(p.x, p.y);
+}

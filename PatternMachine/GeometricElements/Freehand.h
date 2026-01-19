@@ -11,6 +11,7 @@ public:
     Freehand(Canvas*);
     Freehand(HWND);
     Freehand(Layer*);
+    Freehand* Clone() override;
     void StartSizing(POINT) override;
     void Sizing(POINT, POINT) override;
     void StopSizing() override;

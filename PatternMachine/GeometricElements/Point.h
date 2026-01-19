@@ -12,5 +12,6 @@ public:
 	void MoveBy(long, long);
 	void MoveTo(long, long);
 	long operator-(Point);
+	void operator=(Point);
 };
 
