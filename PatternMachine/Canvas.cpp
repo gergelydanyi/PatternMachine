@@ -383,6 +383,7 @@ void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
                 pShape->layer->xForm3.eM22 = 1;
                 pShape->layer->xForm3.eDx = (FLOAT)rotationCenter.x;
                 pShape->layer->xForm3.eDy = (FLOAT)rotationCenter.y;
+                pShape->SetHitRegion();
                 InvalidateRect(hWindow, NULL, FALSE);
             }
         }

@@ -97,7 +97,6 @@ namespace PatternMachine
         rect.top += p1.y;
         rect.right += p1.x;
         rect.bottom += p1.y;
-        SetHitRegion();
         InvalidateRect(mainWindow, NULL, FALSE);
         vertices[0].x += p1.x;
         vertices[0].y += p1.y;
@@ -111,6 +110,7 @@ namespace PatternMachine
         layer->xForm2.eDy = (FLOAT)-rotationCenter.y;
         layer->xForm3.eDx = (FLOAT)rotationCenter.x;
         layer->xForm3.eDy = (FLOAT)rotationCenter.y;
+        SetHitRegion();
     }
 
     void Rectangle::SetHitRegion()
@@ -118,6 +118,16 @@ namespace PatternMachine
         long hitAreaWidth = 5;
         DeleteObject(hitRegion);
         hitRegion = CreateRoundRectRgn(rect.left - hitAreaWidth, rect.top - hitAreaWidth, rect.right + hitAreaWidth + 1, rect.bottom + hitAreaWidth + 1, hitAreaWidth, hitAreaWidth);
+        // TODO: place the following code to a separete method, because it is used as is in every shape class
+        RGNDATA rgnData;
+        auto rgnDataSize = GetRegionData(hitRegion, 0, NULL);
+        std::vector<char> buffer(rgnDataSize);
+        auto ret = GetRegionData(hitRegion, rgnDataSize, (LPRGNDATA)buffer.data());
+        XFORM x;
+        XFORM x2;
+        CombineTransform(&x, &layer->xForm2, &layer->xForm);
+        CombineTransform(&x2, &x, &layer->xForm3);
+        hitRegion = ExtCreateRegion(&x2, ret, (LPRGNDATA)buffer.data());
     }
 
     void Rectangle::Draw()

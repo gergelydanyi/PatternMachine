@@ -98,12 +98,12 @@ namespace PatternMachine
         layer->xForm2.eDy = (FLOAT)-rotationCenter.y;
         layer->xForm3.eDx = (FLOAT)rotationCenter.x;
         layer->xForm3.eDy = (FLOAT)rotationCenter.y;
-        SetHitRegion();
         InvalidateRect(mainWindow, NULL, FALSE);
         vertices[0].x += p1.x;
         vertices[0].y += p1.y;
         vertices[1].x += p1.x;
         vertices[1].y += p1.y;
+        SetHitRegion();
     }
     
     void Ellipse::SetHitRegion()
@@ -111,6 +111,15 @@ namespace PatternMachine
         long hitAreaWidth = 5;
         DeleteObject(hitRegion);
         hitRegion = CreateEllipticRgn(rect.left - hitAreaWidth, rect.top - hitAreaWidth, rect.right + hitAreaWidth + 1, rect.bottom + hitAreaWidth + 1);
+        RGNDATA rgnData;
+        auto rgnDataSize = GetRegionData(hitRegion, 0, NULL);
+        std::vector<char> buffer(rgnDataSize);
+        auto ret = GetRegionData(hitRegion, rgnDataSize, (LPRGNDATA)buffer.data());
+        XFORM x;
+        XFORM x2;
+        CombineTransform(&x, &layer->xForm2, &layer->xForm);
+        CombineTransform(&x2, &x, &layer->xForm3);
+        hitRegion = ExtCreateRegion(&x2, ret, (LPRGNDATA)buffer.data());
     }
 
     void Ellipse::Draw()

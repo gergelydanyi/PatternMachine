@@ -20,9 +20,9 @@ namespace PatternMachine
 		RECT rect{};
 		std::vector<Shape*> shapes{};
 		Canvas* pCanvas;
-		XFORM xForm = { 0, 0, 0, 0, 0, 0 };
-		XFORM xForm2 = { 0, 0, 0, 0, 0, 0 };
-		XFORM xForm3 = { 0, 0, 0, 0, 0, 0 };
+		XFORM xForm = { 1, 0, 0, 1, 0, 0 };
+		XFORM xForm2 = { 1, 0, 0, 1, 0, 0 };
+		XFORM xForm3 = { 1, 0, 0, 1, 0, 0 };
 
 		Layer(Canvas*);
 		Layer(HWND);

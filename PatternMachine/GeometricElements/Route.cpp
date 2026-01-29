@@ -161,6 +161,16 @@ namespace PatternMachine {
 			delete p1;
 			delete p2;
 		}
+		RGNDATA rgnData;
+		auto rgnDataSize = GetRegionData(hitRegion, 0, NULL);
+		std::vector<char> buffer(rgnDataSize);
+		auto ret = GetRegionData(hitRegion, rgnDataSize, (LPRGNDATA)buffer.data());
+		XFORM x;
+		XFORM x2;
+		CombineTransform(&x, &layer->xForm2, &layer->xForm);
+		CombineTransform(&x2, &x, &layer->xForm3);
+		hitRegion = ExtCreateRegion(&x2, ret, (LPRGNDATA)buffer.data());
+
 	}
 	void Route::MoveBy(POINT p1)
 	{

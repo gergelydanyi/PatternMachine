@@ -84,7 +84,6 @@ namespace PatternMachine
 		}
 		p1.MoveBy(p.x, p.y);
 		p2.MoveBy(p.x, p.y);
-		SetHitRegion();
 		InvalidateRect(mainWindow, NULL, FALSE);
 		vertices[0] = { p1.x, p1.y };
 		vertices[1] = { p2.x, p2.y };
@@ -95,6 +94,7 @@ namespace PatternMachine
 		layer->xForm2.eDy = (FLOAT)-rotationCenter.y;
 		layer->xForm3.eDx = (FLOAT)rotationCenter.x;
 		layer->xForm3.eDy = (FLOAT)rotationCenter.y;
+		SetHitRegion();
 	}
 
 	void Line::Draw()
@@ -129,6 +129,16 @@ namespace PatternMachine
 		CombineRgn(hitRegion, hitRegion, ellipseRegion2, RGN_OR);
 		DeleteObject(ellipseRegion1);
 		DeleteObject(ellipseRegion2);
+		RGNDATA rgnData;
+		auto rgnDataSize = GetRegionData(hitRegion, 0, NULL);
+		std::vector<char> buffer(rgnDataSize);
+		auto ret = GetRegionData(hitRegion, rgnDataSize, (LPRGNDATA)buffer.data());
+		XFORM x;
+		XFORM x2;
+		CombineTransform(&x, &layer->xForm2, &layer->xForm);
+		CombineTransform(&x2, &x, &layer->xForm3);
+		hitRegion = ExtCreateRegion(&x2, ret, (LPRGNDATA)buffer.data());
+
 	}
 
 }
