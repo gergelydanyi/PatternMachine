@@ -194,6 +194,11 @@ void Canvas::On_WM_LBUTTONDOWN(WPARAM wParam, LPARAM lParam)
             ActiveShape().StartSizing(mouse.LD());
         }
         break;
+    case Rotation:
+        {
+            
+        }
+        break;
     }
 }
 
@@ -311,7 +316,8 @@ void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
                             Shape* newShape = pShape->Clone();
                             layers.push_back(newShape->layer);
                             shapes.push_back(newShape);
-                            newShape->Draw();
+                            //newShape->Draw();
+                            newShape->layer->DrawShape(newShape);
                         }
                         copyMode = false;
                     }
@@ -341,6 +347,44 @@ void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
         if (mouse.LeftButtonPressed())
         {
             ActiveShape().Sizing(mouse.CurrentPosition(), mouse.MotionVector());
+        }
+        break;
+    case Rotation:
+        if (mouse.LeftButtonPressed())
+        {
+            /*bool mouseOverSelection = false;
+            for (Shape* pShape : selectedShapes)
+            {
+                mouseOverSelection |= PtInRegion(pShape->hitRegion, mouse.CurrentPosition().x, mouse.CurrentPosition().y);
+            }*/
+            POINT rotationCenter;
+            for (Shape* pShape : shapes)
+            {
+                rotationCenter.x = (pShape->rect.right + pShape->rect.left) / 2;
+                rotationCenter.y = (pShape->rect.bottom + pShape->rect.top) / 2;
+                FLOAT w = (FLOAT)mouse.CurrentPosition().x - (FLOAT)rotationCenter.x;
+                FLOAT h = (FLOAT)mouse.CurrentPosition().y - (FLOAT)rotationCenter.y;
+                FLOAT l = (FLOAT)sqrt(w * w + h * h);
+                pShape->layer->xForm.eM11 = w / l;
+                pShape->layer->xForm.eM12 = h / l;
+                pShape->layer->xForm.eM21 = -h / l;
+                pShape->layer->xForm.eM22 = w / l;
+                pShape->layer->xForm.eDx = 0;// (FLOAT)rotationCenter.x* (1 - w / l) + (FLOAT)rotationCenter.y * h / l;
+                pShape->layer->xForm.eDy = 0;// (FLOAT)rotationCenter.y* (1 - w / l) - (FLOAT)rotationCenter.x * h / l;
+                pShape->layer->xForm2.eM11 = 1;
+                pShape->layer->xForm2.eM12 = 0;
+                pShape->layer->xForm2.eM21 = 0;
+                pShape->layer->xForm2.eM22 = 1;
+                pShape->layer->xForm2.eDx = (FLOAT)-rotationCenter.x;
+                pShape->layer->xForm2.eDy = (FLOAT)-rotationCenter.y;
+                pShape->layer->xForm3.eM11 = 1;
+                pShape->layer->xForm3.eM12 = 0;
+                pShape->layer->xForm3.eM21 = 0;
+                pShape->layer->xForm3.eM22 = 1;
+                pShape->layer->xForm3.eDx = (FLOAT)rotationCenter.x;
+                pShape->layer->xForm3.eDy = (FLOAT)rotationCenter.y;
+                InvalidateRect(hWindow, NULL, FALSE);
+            }
         }
         break;
     }
@@ -402,7 +446,8 @@ void Canvas::DrawShape()
         {
             pActiveShape->layer->Reset();
         }
-        pActiveShape->Draw();
+        //pActiveShape->Draw();
+        pActiveShape->layer->DrawShape(pActiveShape);
         if (!ActiveShape().isEditing())
         {
             ActiveShape().isDrawn = true;
@@ -415,7 +460,8 @@ void Canvas::DrawSelectedShapes()
     for (Shape* shape : selectedShapes)
     {
         shape->layer->Reset();
-        shape->Draw();
+        //shape->Draw();
+        shape->layer->DrawShape(shape);
     }
 }
 

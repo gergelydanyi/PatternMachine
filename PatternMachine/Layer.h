@@ -20,6 +20,9 @@ namespace PatternMachine
 		RECT rect{};
 		std::vector<Shape*> shapes{};
 		Canvas* pCanvas;
+		XFORM xForm = { 0, 0, 0, 0, 0, 0 };
+		XFORM xForm2 = { 0, 0, 0, 0, 0, 0 };
+		XFORM xForm3 = { 0, 0, 0, 0, 0, 0 };
 
 		Layer(Canvas*);
 		Layer(HWND);
@@ -28,6 +31,7 @@ namespace PatternMachine
 		void SetPen(HPEN);
 		void SetBrush(HBRUSH);
 		void Reset();
+		void DrawShape(Shape*);
 		void Refresh();
 	};
 

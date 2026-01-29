@@ -99,7 +99,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // Store instance handle in our global variable
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      1, 1, 1, 1, nullptr, nullptr, hInstance, nullptr);
+      1, 1, 800, 600, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
@@ -196,8 +196,45 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         if (fDrawEllipse)
         {
+            HDC memDC = CreateCompatibleDC(ps.hdc);
+            RECT clientRect;
+            GetClientRect(hWnd, &clientRect);
+            HBITMAP hBitmap = CreateCompatibleBitmap(ps.hdc, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
+            SelectObject(memDC, hBitmap);
+            SelectObject(memDC, GetStockObject(GRAY_BRUSH));
+            
+            int iDC = SaveDC(memDC);
+            SetGraphicsMode(memDC, GM_ADVANCED);
+            SetMapMode(memDC, MM_TEXT);
+            XFORM xForm;
+            xForm.eM11 = (FLOAT)0.8660;
+            xForm.eM12 = (FLOAT)0.5000;
+            xForm.eM21 = (FLOAT)-0.5000;
+            xForm.eM22 = (FLOAT)0.8660;
+            xForm.eDx = (FLOAT)0.0;
+            xForm.eDy = (FLOAT)0.0;
+            SetWorldTransform(memDC, &xForm);
+            DPtoLP(memDC, (LPPOINT)&rcTarget, 2);
+            
+            Ellipse(memDC, rcTarget.left, rcTarget.top,
+                rcTarget.right, rcTarget.bottom);
+            BitBlt(ps.hdc, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, memDC, 0, 0, SRCCOPY);
+            RestoreDC(memDC, iDC);
+
+        SetGraphicsMode(ps.hdc, GM_ADVANCED);
+        //SetMapMode(ps.hdc, MM_TEXT);
+        XFORM xForm;
+        xForm.eM11 = (FLOAT)0.8660;
+        xForm.eM12 = (FLOAT)0.5000;
+        xForm.eM21 = (FLOAT)-0.5000;
+        xForm.eM22 = (FLOAT)0.8660;
+        xForm.eDx = (FLOAT)0.0;
+        xForm.eDy = (FLOAT)0.0;
+        SetWorldTransform(ps.hdc, &xForm);
+        DPtoLP(ps.hdc, (LPPOINT)&rcTarget, 2);
             Ellipse(ps.hdc, rcTarget.left, rcTarget.top,
                 rcTarget.right, rcTarget.bottom);
+
             fDrawEllipse = FALSE;
             rcTarget.left = rcTarget.right = 0;
             rcTarget.top = rcTarget.bottom = 0;
@@ -359,7 +396,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         if (fDrawEllipse || fDrawRectangle || fDrawRoundRect)
         {
-            InvalidateRect(hWnd, &rcTarget, TRUE);
+            InvalidateRect(hWnd, /*&rcTarget*/NULL, TRUE);
             UpdateWindow(hWnd);
         }
 

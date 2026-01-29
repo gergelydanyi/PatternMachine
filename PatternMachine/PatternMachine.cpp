@@ -654,6 +654,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case ID_EDIT_DRAWINGMODE:
                 pAppCore->ChangeCanvasBehaviour(Drawing);
                 break;
+            case ID_EDIT_ROTATE:
+                pAppCore->ChangeCanvasBehaviour(Rotation);
+                break;
             case ID_SHAPE_RECTANGLE:
                 pAppCore->SelectShapeType(ShapeType::RectangleShapeType);
                 break;

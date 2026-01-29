@@ -39,6 +39,12 @@ namespace PatternMachine
             rect.top = startPoint.y;
             rect.right = rect.left + 100;
             rect.bottom = rect.top + 100;
+            // TODO: set the following two lines for each shape type, then place to another function in Shape class
+            // rotationCenter is required for rotation transformation, and its value should be corrected each time the shape is moved or resized
+            rotationCenter.x = (rect.left + rect.right) / 2;
+            rotationCenter.y = (rect.top + rect.bottom) / 2;
+            vertices.push_back(startPoint);
+            vertices.push_back({ rect.right, rect.bottom });
         }
         isSizing = true;
         isDrawn = false;
@@ -59,6 +65,10 @@ namespace PatternMachine
             rect.right = r > l ? r : l;
             rect.top = b < t ? b : t;
             rect.bottom = b > t ? b : t;
+            // TODO: set the following two lines for each shape type, then place to another function in Shape class
+            // rotationCenter is required for rotation transformation, and its value should be corrected each time the shape is moved or resized
+            rotationCenter.x = (rect.left + rect.right) / 2;
+            rotationCenter.y = (rect.top + rect.bottom) / 2;
             SetRect(&rectToBeInvalidated,
                 rect.left - abs(motionVector.x),
                 rect.top - abs(motionVector.y),
@@ -69,6 +79,8 @@ namespace PatternMachine
             // TODO: figure out why this is happening
             // (2026.01.07.) It is messing the screen only when pen width is more than 1
             InvalidateRect(mainWindow, NULL, FALSE);
+            vertices[0] = { rect.left, rect.top };
+            vertices[1] = { rect.right, rect.bottom };
         }
     }
 
@@ -87,6 +99,18 @@ namespace PatternMachine
         rect.bottom += p1.y;
         SetHitRegion();
         InvalidateRect(mainWindow, NULL, FALSE);
+        vertices[0].x += p1.x;
+        vertices[0].y += p1.y;
+        vertices[1].x += p1.x;
+        vertices[1].y += p1.y;
+        // TODO: set the following six lines for each shape type, then place to another function in Shape class
+        // rotationCenter is required for rotation transformation, and its value should be corrected each time the shape is moved or resized
+        rotationCenter.x += p1.x;
+        rotationCenter.y += p1.y;
+        layer->xForm2.eDx = (FLOAT)-rotationCenter.x;
+        layer->xForm2.eDy = (FLOAT)-rotationCenter.y;
+        layer->xForm3.eDx = (FLOAT)rotationCenter.x;
+        layer->xForm3.eDy = (FLOAT)rotationCenter.y;
     }
 
     void Rectangle::SetHitRegion()
@@ -98,7 +122,8 @@ namespace PatternMachine
 
     void Rectangle::Draw()
     {
-        ::Rectangle(layer->hDC, rect.left, rect.top, rect.right, rect.bottom);
+        //::Rectangle(layer->hDC, rect.left, rect.top, rect.right, rect.bottom);
+        ::Rectangle(layer->hDC, vertices[0].x, vertices[0].y, vertices[1].x, vertices[1].y);
     }
 
 }

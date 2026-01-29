@@ -36,7 +36,13 @@ namespace PatternMachine
 		vertices.push_back(startPoint);
 		previousPoint = anchor;
 		currentPoint = anchor;
+		topmostVertex = anchor;
+		rightmostVertex = anchor;
+		bottommostVertex = anchor;
+		leftmostVertex = anchor;
 		SetRect(&rect, anchor.x, anchor.y, anchor.x, anchor.y);
+		rotationCenter.x = (rect.left + rect.right) / 2;
+		rotationCenter.y = (rect.top + rect.bottom) / 2;
 		InvalidateRect(mainWindow, &rect, FALSE);
 	}
 	void Freehand::Sizing(POINT prevPoint, POINT currPoint)
@@ -44,13 +50,32 @@ namespace PatternMachine
 		if (isSizing)
 		{
 			currentPoint = prevPoint;
+			if (currentPoint.y < topmostVertex.y)
+			{
+				topmostVertex = currentPoint;
+			}
+			if (currentPoint.x > rightmostVertex.x)
+			{
+				rightmostVertex = currentPoint;
+			}
+			if (currentPoint.y > bottommostVertex.y)
+			{
+				bottommostVertex = currentPoint;
+			}
+			if (currentPoint.x < leftmostVertex.x)
+			{
+				leftmostVertex = currentPoint;
+			}
 			vertices.push_back(prevPoint);
 			RECT rectToBeInvalidated;
 			rectToBeInvalidated.left = prevPoint.x < currPoint.x ? prevPoint.x : currPoint.x;
 			rectToBeInvalidated.top = prevPoint.y < currPoint.y ? prevPoint.y : currPoint.y;
 			rectToBeInvalidated.right = prevPoint.x < currPoint.x ? currPoint.x : prevPoint.x;
 			rectToBeInvalidated.bottom = prevPoint.y < currPoint.y ? currPoint.y : prevPoint.y;
-			SetRect(&rect, rectToBeInvalidated.left, rectToBeInvalidated.top, rectToBeInvalidated.right, rectToBeInvalidated.bottom);
+			//SetRect(&rect, rectToBeInvalidated.left, rectToBeInvalidated.top, rectToBeInvalidated.right, rectToBeInvalidated.bottom);
+			SetRect(&rect, leftmostVertex.x, topmostVertex.y, rightmostVertex.x, bottommostVertex.y);
+			rotationCenter.x = (rect.left + rect.right) / 2;
+			rotationCenter.y = (rect.top + rect.bottom) / 2;
 			InvalidateRect(mainWindow, NULL, FALSE);
 		}
 	}
@@ -88,6 +113,12 @@ namespace PatternMachine
 		rect.top += p1.y;
 		rect.right += p1.x;
 		rect.bottom += p1.y;
+		rotationCenter.x += p1.x;
+		rotationCenter.y += p1.y;
+		layer->xForm2.eDx = (FLOAT)-rotationCenter.x;
+		layer->xForm2.eDy = (FLOAT)-rotationCenter.y;
+		layer->xForm3.eDx = (FLOAT)rotationCenter.x;
+		layer->xForm3.eDy = (FLOAT)rotationCenter.y;
 		MoveHitRegion(p1);
 		InvalidateRect(mainWindow, NULL, FALSE);
 	}
@@ -104,6 +135,7 @@ namespace PatternMachine
 			{
 				MoveToEx(layer->hDC, previousPoint.x, previousPoint.y, NULL);
 				LineTo(layer->hDC, currentPoint.x, currentPoint.y);
+				//::Rectangle(layer->hDC, rect.left, rect.top, rect.right, rect.bottom);
 			}
 			previousPoint = currentPoint;
 		}
@@ -117,6 +149,7 @@ namespace PatternMachine
 				nextPoint = vertices[i];
 				LineTo(layer->hDC, nextPoint.x, nextPoint.y);
 			}
+			//::Rectangle(layer->hDC, rect.left, rect.top, rect.right, rect.bottom);
 		}
 	}
 	HRGN Freehand::SetSegmentHitRegion(Point* p1, Point* p2)

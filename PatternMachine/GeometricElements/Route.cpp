@@ -35,6 +35,8 @@ namespace PatternMachine {
 		isDrawn = false;
 		anchor = startPoint;
 		SetRect(&rect, anchor.x, anchor.y, anchor.x, anchor.y);
+		rotationCenter.x = (rect.left + rect.right) / 2;
+		rotationCenter.y = (rect.top + rect.bottom) / 2;
 		InvalidateRect(mainWindow, &rect, FALSE);
 	}
 	void Route::Sizing(POINT prevPoint, POINT currPoint)
@@ -42,6 +44,8 @@ namespace PatternMachine {
 		if (isSizing)
 		{
 			SetRect(&rect, anchor.x, anchor.y, prevPoint.x, prevPoint.y);
+			rotationCenter.x = (rect.left + rect.right) / 2;
+			rotationCenter.y = (rect.top + rect.bottom) / 2;
 			endPoint = prevPoint;
 			RECT rectToBeInvalidated;
 			rectToBeInvalidated.left = prevPoint.x < currPoint.x ? prevPoint.x : currPoint.x;
@@ -169,6 +173,12 @@ namespace PatternMachine {
 		rect.top += p1.y;
 		rect.right += p1.x;
 		rect.bottom += p1.y;
+		rotationCenter.x += p1.x;
+		rotationCenter.y += p1.y;
+		layer->xForm2.eDx = (FLOAT)-rotationCenter.x;
+		layer->xForm2.eDy = (FLOAT)-rotationCenter.y;
+		layer->xForm3.eDx = (FLOAT)rotationCenter.x;
+		layer->xForm3.eDy = (FLOAT)rotationCenter.y;
 		MoveHitRegion(p1);
 		InvalidateRect(mainWindow, NULL, FALSE);
 	}

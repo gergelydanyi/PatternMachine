@@ -16,6 +16,8 @@ namespace PatternMachine
 		this->p2 = p2;
 		points[0] = &p1;
 		points[1] = &p2;
+		vertices.push_back({ p1.x, p1.y });
+		vertices.push_back({ p2.x, p2.y });
 		SetLayer(pLayer);
 		mainWindow = layer->pCanvas->hWindow;
 	}
@@ -49,6 +51,9 @@ namespace PatternMachine
 		p1.MoveTo(p.x, p.y);
 		isSizing = true;
 		isDrawn = false;
+		rotationCenter.x = (rect.left + rect.right) / 2;
+		rotationCenter.y = (rect.top + rect.bottom) / 2;
+		vertices[0] = p;
 	}
 
 	void Line::Sizing(POINT p1, POINT p2)
@@ -57,6 +62,9 @@ namespace PatternMachine
 		{
 			this->p2.MoveTo(p1.x, p1.y);
 			InvalidateRect(mainWindow, NULL, FALSE);
+			vertices[1] = p1;
+			rotationCenter.x = (rect.left + rect.right) / 2;
+			rotationCenter.y = (rect.top + rect.bottom) / 2;
 		}
 	}
 
@@ -65,6 +73,7 @@ namespace PatternMachine
 		SetHitRegion();
 		isSizing = false;
 		InvalidateRect(mainWindow, NULL, FALSE);
+		rect = { p1.x , p1.y, p2.x, p2.y };
 	}
 
 	void Line::MoveBy(POINT p)
@@ -77,12 +86,23 @@ namespace PatternMachine
 		p2.MoveBy(p.x, p.y);
 		SetHitRegion();
 		InvalidateRect(mainWindow, NULL, FALSE);
+		vertices[0] = { p1.x, p1.y };
+		vertices[1] = { p2.x, p2.y };
+		rect = { p1.x, p1.y, p2.x, p2.y };
+		rotationCenter.x += p1.x;
+		rotationCenter.y += p1.y;
+		layer->xForm2.eDx = (FLOAT)-rotationCenter.x;
+		layer->xForm2.eDy = (FLOAT)-rotationCenter.y;
+		layer->xForm3.eDx = (FLOAT)rotationCenter.x;
+		layer->xForm3.eDy = (FLOAT)rotationCenter.y;
 	}
 
 	void Line::Draw()
 	{
-		MoveToEx(layer->hDC, p1.x, p1.y, NULL);
-		LineTo(layer->hDC, p2.x, p2.y);
+		//MoveToEx(layer->hDC, p1.x, p1.y, NULL);
+		//LineTo(layer->hDC, p2.x, p2.y);
+		MoveToEx(layer->hDC, vertices[0].x, vertices[0].y, NULL);
+		LineTo(layer->hDC, vertices[1].x, vertices[1].y);
 	}
 
 	void Line::SetHitRegion()

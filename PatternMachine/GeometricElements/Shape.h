@@ -28,8 +28,10 @@ namespace PatternMachine
 		~Shape();
 		virtual Shape* Clone();
 		POINT anchor;
+		POINT rotationCenter;
 		RECT rect = { 0, 0, 100, 100 };
 		std::vector<POINT> vertices;
+		LPPOINT POINTS; // This is for drawing, initiated from the layer. When attempted to start drawing from layer by vertices, DPtoLP function caused a crash.
 		virtual RECT BoundingRectangle();
 		bool isEditing();
 		virtual void StartSizing(POINT);
@@ -53,7 +55,7 @@ namespace PatternMachine
 		void HitTest(POINT, POINT);
 		virtual void SetHitRegion();
 		void MoveHitRegion(POINT);
-	private:
+	protected:
 		POINT topmostVertex;
 		POINT rightmostVertex;
 		POINT bottommostVertex;

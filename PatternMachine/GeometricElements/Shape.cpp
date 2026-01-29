@@ -42,6 +42,10 @@ namespace PatternMachine
 			InvalidateRect(mainWindow, NULL, FALSE);
 		}
 	}
+	// TODO: Due to transformations, hitregion does not follow the form and placement of the shape anymore,
+	// because regions can not be transformed
+	// Instead of regions, we should use paths, which can be transformed alongside with the shape,
+	// and after that it can be converted to a region to do hit testing
 	void Shape::SetHitRegion()
 	{
 		long hitAreaWidth = 5;

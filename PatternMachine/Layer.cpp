@@ -59,4 +59,32 @@ namespace PatternMachine
 		DeleteObject(hbr);
 	}
 
+	void Layer::DrawShape(Shape* shape)
+	{
+		int iDC = SaveDC(hDC);
+		SetGraphicsMode(hDC, GM_ADVANCED);
+
+		//SetMapMode(hDC, MM_HIENGLISH);
+		
+		//SetWindowOrgEx(hDC, (int)(shape->rect.left + shape->rect.right) / 2, (int)(shape->rect.top + shape->rect.bottom) / 2, NULL);
+		//SetViewportOrgEx(hDC, (int)(shape->rect.left + shape->rect.right) / 2, (int)(shape->rect.top + shape->rect.bottom) / 2, NULL);
+		
+		SetWorldTransform(hDC, &xForm);
+		ModifyWorldTransform(hDC, &xForm2, MWT_LEFTMULTIPLY);
+		ModifyWorldTransform(hDC, &xForm3, MWT_RIGHTMULTIPLY);
+		shape->POINTS = new POINT[shape->vertices.size()];
+		/*for (int i = 0; i < shape->vertices.size(); ++i)
+		{
+			shape->POINTS[i] = shape->vertices[i];
+			DPtoLP(hDC, (LPPOINT) & (shape->vertices[i]), 1);
+		}*/
+		shape->Draw();
+		/*for (int i = 0; i < shape->vertices.size(); ++i)
+		{
+			shape->vertices[i] = shape->POINTS[i];
+		}*/
+		delete shape->POINTS;
+		RestoreDC(hDC, iDC);
+	}
+
 }

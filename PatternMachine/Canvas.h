@@ -11,7 +11,8 @@ namespace PatternMachine
 	enum CanvasBehaviour {
 		PointingSelection,
 		FramingSelection,
-		Drawing
+		Drawing,
+		Rotation
 	};
 
 	class Canvas
