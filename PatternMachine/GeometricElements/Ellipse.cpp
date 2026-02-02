@@ -8,26 +8,13 @@ namespace PatternMachine
 
 	Ellipse::Ellipse(HWND hwnd) : Ellipse(new Layer(hwnd)) {}
 
-	Ellipse::Ellipse(Layer* pLayer)
-	{
-		type = EllipseShapeType;
-		SetLayer(pLayer);
-		mainWindow = pLayer->pCanvas->hWindow;
-	}
+    Ellipse::Ellipse(Layer* pLayer) : Shape(pLayer, EllipseShapeType) {}
+
+    Ellipse::Ellipse(const Ellipse& other) : Shape(other) {}
 
     Ellipse* Ellipse::Clone()
     {
-        Ellipse* clone = new Ellipse(layer->pCanvas);
-        clone->anchor = this->anchor;
-        clone->rect = this->rect;
-        clone->vertices = this->vertices;
-
-        clone->type = this->type;
-        clone->mainWindow = this->mainWindow;
-        clone->layer->SetPen(this->layer->hPen);
-        clone->layer->SetBrush(this->layer->hBrush);
-        clone->SetHitRegion();
-        return clone;
+        return new Ellipse(*this);
     }
 
     void Ellipse::StartSizing(POINT startPoint)

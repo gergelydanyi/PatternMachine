@@ -17,6 +17,7 @@ namespace PatternMachine
 		Line(HWND);
 		Line(Layer*);
 		Line(Point&, Point&, Layer*);
+		Line(const Line&);
 		~Line();
 		Line* Clone() override;
 		void StartSizing(POINT) override;

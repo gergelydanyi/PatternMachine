@@ -20,13 +20,15 @@ namespace PatternMachine
 
 	class Shape
 	{
-	public:
+	protected:
 		Shape();
-		Shape(Canvas*);
+		Shape(Canvas*); // Use this when shape is created by Canvas
 		Shape(HWND);
-		Shape(Layer*);
+		Shape(Layer*, ShapeType); // Use this when shape is created on an existing layer
+		Shape(const Shape&);
+	public:
 		~Shape();
-		virtual Shape* Clone();
+		virtual Shape* Clone() = 0;
 		POINT anchor;
 		POINT rotationCenter;
 		RECT rect = { 0, 0, 100, 100 };

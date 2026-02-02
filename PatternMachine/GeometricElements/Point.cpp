@@ -33,3 +33,8 @@ void Point::operator=(Point p)
 {
 	MoveTo(p.x, p.y);
 }
+
+Point::operator POINT () const
+{
+	return { x, y };
+}

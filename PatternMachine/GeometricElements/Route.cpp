@@ -1,32 +1,21 @@
 #include "Route.h"
 #include "Canvas.h"
 
-namespace PatternMachine {
+namespace PatternMachine
+{
 
 	Route::Route(Canvas* pCanvas) : Route(new Layer(pCanvas)) {}
 
 	Route::Route(HWND hwnd) : Route(new Layer(hwnd)) {}
 
-	Route::Route(Layer* pLayer)
-	{
-		type = RouteShapeType;
-		SetLayer(pLayer);
-		mainWindow = layer->pCanvas->hWindow;
-	}
+	Route::Route(Layer* pLayer) : Shape(pLayer, RouteShapeType) {}
+
+	Route::Route(const Route& other) : Shape(other),
+		routePoints(other.routePoints) {} // TODO use vertices instead of routePoints
 
 	Route* Route::Clone()
 	{
-		Route* clone = new Route(layer->pCanvas);
-		clone->anchor = this->anchor;
-		clone->rect = this->rect;
-		clone->vertices = this->vertices;
-		clone->routePoints = this->routePoints; // TODO use vertices instead of routePoints
-		clone->type = this->type;
-		clone->mainWindow = this->mainWindow;
-		clone->layer->SetPen(this->layer->hPen);
-		clone->layer->SetBrush(this->layer->hBrush);
-		clone->SetHitRegion();
-		return clone;
+		return new Route(*this);
 	}
 
 	void Route::StartSizing(POINT startPoint)

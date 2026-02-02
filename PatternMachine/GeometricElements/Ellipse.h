@@ -11,6 +11,7 @@ namespace PatternMachine
         Ellipse(Canvas*);
         Ellipse(HWND);
         Ellipse(Layer* pLayer);
+        Ellipse(const Ellipse&);
         Ellipse* Clone() override;
         void StartSizing(POINT) override;
         void Sizing(POINT, POINT) override;

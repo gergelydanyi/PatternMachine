@@ -1,4 +1,5 @@
 #pragma once
+#include "framework.h"
 class Point
 {
 public:
@@ -13,5 +14,6 @@ public:
 	void MoveTo(long, long);
 	long operator-(Point);
 	void operator=(Point);
+	operator POINT () const;
 };
 

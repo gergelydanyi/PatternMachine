@@ -226,8 +226,9 @@ void Canvas::On_WM_LBUTTONUP(WPARAM wParam, LPARAM lParam)
         }
         InvalidateRect(hWindow, NULL, FALSE);
     }
-        break;
+    break;
     case PointingSelection:
+    {
         if (selectionMode)
         {
             bool CtrlPressed = wParam & MK_CONTROL;
@@ -235,10 +236,21 @@ void Canvas::On_WM_LBUTTONUP(WPARAM wParam, LPARAM lParam)
             selectionMode = false;
         }
         copyMode = false;
-        break;
+    }
+    break;
     case Drawing:
+    {
         ActiveShape().StopSizing();
-        break;
+    }
+    break;
+    case Rotation:
+    {
+        for (auto shape : selectedShapes)
+        {
+            shape->SetHitRegion();
+        }
+    }
+    break;
     }
 }
 
@@ -322,11 +334,11 @@ void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
                         copyMode = false;
                     }
                 }
-                if (selectedShapes.size() < 2)
-                {
-                    SelectHighlightedShapes(CtrlPressed);
-                    selectionMode = false;
-                }
+                //if (selectedShapes.size() < 2)
+                //{
+                //    SelectHighlightedShapes(CtrlPressed);
+                //    selectionMode = false;
+                //}
                 for (Shape* pShape : selectedShapes)
                 {
                     pShape->MoveBy(mouse.MotionVector());
@@ -352,13 +364,8 @@ void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
     case Rotation:
         if (mouse.LeftButtonPressed())
         {
-            /*bool mouseOverSelection = false;
-            for (Shape* pShape : selectedShapes)
-            {
-                mouseOverSelection |= PtInRegion(pShape->hitRegion, mouse.CurrentPosition().x, mouse.CurrentPosition().y);
-            }*/
             POINT rotationCenter;
-            for (Shape* pShape : shapes)
+            for (Shape* pShape : selectedShapes)
             {
                 rotationCenter.x = (pShape->rect.right + pShape->rect.left) / 2;
                 rotationCenter.y = (pShape->rect.bottom + pShape->rect.top) / 2;
@@ -383,7 +390,7 @@ void Canvas::On_WM_MOUSEMOVE(WPARAM wParam, LPARAM lParam)
                 pShape->layer->xForm3.eM22 = 1;
                 pShape->layer->xForm3.eDx = (FLOAT)rotationCenter.x;
                 pShape->layer->xForm3.eDy = (FLOAT)rotationCenter.y;
-                pShape->SetHitRegion();
+//                pShape->SetHitRegion();
                 InvalidateRect(hWindow, NULL, FALSE);
             }
         }

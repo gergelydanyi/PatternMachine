@@ -9,41 +9,35 @@ namespace PatternMachine
 
 	Line::Line(Layer* pLayer) : Line(*new Point(), *new Point(), pLayer) {}
 
-	Line::Line(Point& p1, Point& p2, Layer* pLayer)
+	Line::Line(Point& p1, Point& p2, Layer* pLayer) : Shape(pLayer, LineShapeType)
 	{
-		type = LineShapeType;
 		this->p1 = p1;
 		this->p2 = p2;
 		points[0] = &p1;
 		points[1] = &p2;
-		vertices.push_back({ p1.x, p1.y });
-		vertices.push_back({ p2.x, p2.y });
-		SetLayer(pLayer);
-		mainWindow = layer->pCanvas->hWindow;
+		vertices.push_back((POINT)p1);
+		vertices.push_back((POINT)p2);
+	}
+
+	Line::Line(const Line& other) : Shape(other),
+		p1(other.p1),
+		p2(other.p2)
+	{
+		points[0] = &p1;
+		points[1] = &p2;
+		vertices.push_back((POINT)p1);
+		vertices.push_back((POINT)p2);
+	}
+
+	Line* Line::Clone()
+	{
+		return new Line(*this);
 	}
 
 	Line::~Line()
 	{
 		delete& p1;
 		delete& p2;
-	}
-
-	Line* Line::Clone()
-	{
-		Line* clone = new Line(layer->pCanvas);
-		clone->anchor = this->anchor;
-		clone->rect = this->rect;
-		clone->vertices = this->vertices;
-		clone->p1 = this->p1;
-		clone->p2 = this->p2;
-		//clone->points[0] = &(clone->p1);
-		//clone->points[1] = &(clone->p2);
-		clone->type = this->type;
-		clone->mainWindow = this->mainWindow;
-		clone->layer->SetPen(this->layer->hPen);
-		clone->layer->SetBrush(this->layer->hBrush);
-		clone->SetHitRegion();
-		return clone;
 	}
 
 	void Line::StartSizing(POINT p)

@@ -1,4 +1,5 @@
 #include "Shape.h"
+#include "Canvas.h"
 
 namespace PatternMachine
 {
@@ -7,22 +8,23 @@ namespace PatternMachine
 	Shape::Shape() {}
 	Shape::Shape(Canvas* pCanvas) {}
 	Shape::Shape(HWND) {}
-	Shape::Shape(Layer* l) { SetLayer(l); }
-	Shape::~Shape() { delete layer; }
-	Shape* Shape::Clone()
+	Shape::Shape(Layer* l, ShapeType shapeType) :
+		type(shapeType),
+		mainWindow(l->pCanvas->hWindow)
 	{
-		Shape* clone = new Shape(layer->pCanvas);
-		clone->anchor = this->anchor;
-		clone->rect = this->rect;
-		clone->vertices = this->vertices;
-
-		clone->type = this->type;
-		clone->mainWindow = this->mainWindow;
-		clone->layer->SetPen(this->layer->hPen);
-		clone->layer->SetBrush(this->layer->hBrush);
-		clone->SetHitRegion();
-		return clone;
+		SetLayer(l);
 	}
+	Shape::Shape(const Shape& s) :
+		Shape(new Layer(s.layer->pCanvas), s.type)
+	{
+		anchor = s.anchor;
+		rect = s.rect;
+		vertices = s.vertices;
+		layer->SetPen(s.layer->hPen);
+		layer->SetBrush(s.layer->hBrush);
+		SetHitRegion();
+	}
+	Shape::~Shape() { delete layer; }
 	bool Shape::isEditing()	{ return isSizing || isMoving; }
 	void Shape::StartSizing(POINT) {}
 	void Shape::Sizing(POINT, POINT) {}
@@ -42,9 +44,9 @@ namespace PatternMachine
 			InvalidateRect(mainWindow, NULL, FALSE);
 		}
 	}
-	// TODO: Due to transformations, hitregion does not follow the form and placement of the shape anymore,
-	// because regions can not be transformed
-	// Instead of regions, we should use paths, which can be transformed alongside with the shape,
+	// DONE: Due to transformations, hitregion does not follow the form and placement of the s anymore,
+	// because regions can not be transformed -> regions can be transformed by ExtCreateRegion function
+	// TODO: Instead of regions, we should use paths, which can be transformed alongside with the s,
 	// and after that it can be converted to a region to do hit testing
 	void Shape::SetHitRegion()
 	{

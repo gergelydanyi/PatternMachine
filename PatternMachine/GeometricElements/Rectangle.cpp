@@ -8,26 +8,13 @@ namespace PatternMachine
 
     Rectangle::Rectangle(HWND hwnd) : Rectangle(new Layer(hwnd)) {}
 
-    Rectangle::Rectangle(Layer* pLayer)
-    {
-        type = RectangleShapeType;
-        SetLayer(pLayer);
-        mainWindow = layer->pCanvas->hWindow;
-    }
+    Rectangle::Rectangle(Layer* pLayer) : Shape(pLayer, RectangleShapeType) {}
+
+    Rectangle::Rectangle(const Rectangle& other) : Shape(other) {}
 
     Rectangle* Rectangle::Clone()
     {
-        Rectangle* clone = new Rectangle(layer->pCanvas);
-        clone->anchor = this->anchor;
-        clone->rect = this->rect;
-        clone->vertices = this->vertices;
-
-        clone->type = this->type;
-        clone->mainWindow = this->mainWindow;
-        clone->layer->SetPen(this->layer->hPen);
-        clone->layer->SetBrush(this->layer->hBrush);
-        clone->SetHitRegion();
-        return clone;
+        return new Rectangle(*this);
     }
 
     void Rectangle::StartSizing(POINT startPoint)

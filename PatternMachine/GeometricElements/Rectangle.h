@@ -11,6 +11,7 @@ namespace PatternMachine
         Rectangle(Canvas*);
         Rectangle(HWND);
         Rectangle(Layer* pLayer);
+        Rectangle(const Rectangle&);
         Rectangle* Clone() override;
         void StartSizing(POINT) override;
         void Sizing(POINT, POINT) override;

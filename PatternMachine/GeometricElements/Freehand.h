@@ -10,6 +10,7 @@ namespace PatternMachine
         Freehand(Canvas*);
         Freehand(HWND);
         Freehand(Layer*);
+        Freehand(const Freehand&);
         Freehand* Clone() override;
         void StartSizing(POINT) override;
         void Sizing(POINT, POINT) override;

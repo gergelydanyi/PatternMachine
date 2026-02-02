@@ -23,6 +23,7 @@
 //      - the shapes are parameterizable, angles can be set in polygons, number of vertices can be changed and so on
 //      - all-in-all object can be edited, copied, deleted and so on
 //      - edit can be performed on more objects at the same time
+//      - recognize the intersection of shapes as points -> these points can be converted into geometric elements
 //      - the final goal is to have a tool which can create patterns from objects (shapes) by giving a rule or ruleset for generating them
 //      - this pattern generation is performed by creating rules
 //      - rules can be ex. functions for setting the size, rotation or color of the shape
